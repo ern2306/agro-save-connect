@@ -69,9 +69,9 @@ const PestDetectPage = () => {
 
             <div className="space-y-2">
               {[
-                { icon: Leaf, title: "Add more nutrients", desc: "Apply organic fertilizer to boost immunity" },
-                { icon: Droplets, title: "Increase watering", desc: "Water twice daily in the morning and evening" },
-                { icon: Bug, title: "Apply pest control", desc: "Use neem oil spray on affected areas" },
+                { icon: Leaf, title: "Add more nutrients", desc: "Mix 2 tablespoons of compost fertilizer with 1 litre of water and apply to the soil base every 3 days" },
+                { icon: Droplets, title: "Increase watering", desc: "Add 2 cups (500ml) of water twice daily — once at 7AM and again at 6PM — directly to the root area" },
+                { icon: Bug, title: "Apply pest control", desc: "Dilute 5ml of neem oil in 1 litre of water and spray on both sides of leaves every 5 days for 2 weeks" },
               ].map((s, i) => (
                 <div key={i} className="bg-card rounded-xl p-3 flex items-start gap-3 border border-border">
                   <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
