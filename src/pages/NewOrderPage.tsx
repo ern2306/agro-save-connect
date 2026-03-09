@@ -4,35 +4,61 @@ import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { toast } from "sonner";
 
+type OrderStep = "actions" | "tracking" | "status" | "shipped";
+
 const NewOrderPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { orders, setOrders, notifications, setNotifications } = useApp();
   const order = orders.find((o) => o.id === id);
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [showTracking, setShowTracking] = useState(false);
+  const [step, setStep] = useState<OrderStep>("actions");
 
   if (!order) return <div className="p-4">Order not found</div>;
 
-  const handlePrepare = () => setShowTracking(true);
+  const handlePrepare = () => setStep("tracking");
 
-  const handleShip = () => {
+  const handleSubmitTracking = () => {
     if (!trackingNumber.trim()) {
       toast.error("Please enter tracking number");
       return;
     }
     setOrders(orders.map((o) =>
-      o.id === id ? { ...o, status: "shipped" as const, trackingNumber } : o
+      o.id === id ? { ...o, status: "preparing" as const, trackingNumber } : o
+    ));
+    toast.success("Tracking number saved!");
+    setStep("status");
+  };
+
+  const handleOutForDelivery = () => {
+    setOrders(orders.map((o) =>
+      o.id === id ? { ...o, status: "shipped" as const } : o
     ));
     setNotifications([
       {
-        id: `n${Date.now()}`, type: "order_shipped", title: "Order Shipped",
-        message: `Order for ${order.listing.name} has been shipped`, orderId: id!,
+        id: `n${Date.now()}`, type: "order_shipped", title: "Out for Delivery",
+        message: `Order for ${order.listing.name} is out for delivery`, orderId: id!,
         timestamp: new Date(), read: false,
       },
       ...notifications,
     ]);
-    toast.success("Order shipped!");
+    toast.success("Order is out for delivery!");
+    setStep("shipped");
+  };
+
+  const handleOrderShipped = () => {
+    setOrders(orders.map((o) =>
+      o.id === id ? { ...o, status: "delivered" as const } : o
+    ));
+    setNotifications([
+      {
+        id: `n${Date.now()}`, type: "order_confirmed", title: "Order Delivered",
+        message: `Order for ${order.listing.name} has been delivered`, orderId: id!,
+        timestamp: new Date(), read: false,
+      },
+      ...notifications,
+    ]);
+    toast.success("Order delivered!");
     navigate("/notifications");
   };
 
@@ -67,9 +93,23 @@ const NewOrderPage = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">Buyer address: {order.address}</p>
+          {order.trackingNumber && (
+            <p className="text-sm text-muted-foreground mt-1">Tracking: {order.trackingNumber}</p>
+          )}
         </div>
 
-        {showTracking ? (
+        {step === "actions" && (
+          <div className="flex gap-3">
+            <button onClick={handlePrepare} className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+              Preparing Order
+            </button>
+            <button onClick={handleCancel} className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground font-semibold text-sm">
+              Cancel Order
+            </button>
+          </div>
+        )}
+
+        {step === "tracking" && (
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Tracking Number</label>
@@ -80,17 +120,26 @@ const NewOrderPage = () => {
                 className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
-            <button onClick={handleShip} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
-              Confirm & Ship
+            <button onClick={handleSubmitTracking} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+              Submit Tracking Number
             </button>
           </div>
-        ) : (
-          <div className="flex gap-3">
-            <button onClick={handlePrepare} className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
-              Preparing Order
+        )}
+
+        {step === "status" && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground text-center">Select delivery status:</p>
+            <button onClick={handleOutForDelivery} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+              Order is Out for Delivery
             </button>
-            <button onClick={handleCancel} className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground font-semibold text-sm">
-              Cancel Order
+          </div>
+        )}
+
+        {step === "shipped" && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground text-center">Order is currently out for delivery</p>
+            <button onClick={handleOrderShipped} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+              Order is Delivered
             </button>
           </div>
         )}

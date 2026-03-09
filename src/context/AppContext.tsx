@@ -92,11 +92,19 @@ export const useApp = () => {
 import potatoImg from "@/assets/potato.png";
 import tomatoImg from "@/assets/tomato.png";
 import cucumberImg from "@/assets/cucumber.png";
+import kangkungImg from "@/assets/kangkung.png";
+import broccoliImg from "@/assets/broccoli.png";
+import chiliImg from "@/assets/chili.png";
+import cabbageImg from "@/assets/cabbage.png";
 
 const defaultListings: Listing[] = [
   { id: "1", name: "Potato", price: 3.5, stock: 120, image: potatoImg, seller: "Farmer Ali", sellerId: "seller1" },
   { id: "2", name: "Tomato", price: 5.0, stock: 80, image: tomatoImg, seller: "Farmer Siti", sellerId: "seller2" },
   { id: "3", name: "Cucumber", price: 4.0, stock: 95, image: cucumberImg, seller: "Farmer Ahmad", sellerId: "seller3" },
+  { id: "4", name: "Kangkung", price: 2.5, stock: 200, image: kangkungImg, seller: "John Farmer", sellerId: "user1" },
+  { id: "5", name: "Broccoli", price: 8.0, stock: 45, image: broccoliImg, seller: "John Farmer", sellerId: "user1" },
+  { id: "6", name: "Chili", price: 12.0, stock: 60, image: chiliImg, seller: "Farmer Ali", sellerId: "seller1" },
+  { id: "7", name: "Cabbage", price: 3.0, stock: 150, image: cabbageImg, seller: "John Farmer", sellerId: "user1" },
 ];
 
 const defaultNotifications: Notification[] = [
