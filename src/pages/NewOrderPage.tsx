@@ -69,6 +69,11 @@ const NewOrderPage = () => {
         message: `Order for ${order.listing.name} has been cancelled`, orderId: id!,
         timestamp: new Date(), read: false,
       },
+      {
+        id: `n${Date.now() + 1}`, type: "order_cancelled_seller", title: "Order Cancelled by You",
+        message: `You cancelled the order for ${order.listing.name}`, orderId: id!,
+        timestamp: new Date(), read: false,
+      },
       ...notifications,
     ]);
     toast.info("Order cancelled");

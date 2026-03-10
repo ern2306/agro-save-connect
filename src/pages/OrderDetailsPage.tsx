@@ -1,11 +1,12 @@
-import { useParams } from "react-router-dom";
-import { Package, MapPin, Truck, CheckCircle, Clock, XCircle } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { format } from "date-fns";
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { orders } = useApp();
   const order = orders.find((o) => o.id === id);
 
@@ -77,6 +78,11 @@ const OrderDetailsPage = () => {
             </div>
           )}
         </div>
+
+        <button onClick={() => navigate("/explore")}
+          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">
+          <ArrowLeft className="w-4 h-4" /> Back to Explore
+        </button>
       </div>
     </div>
   );
