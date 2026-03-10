@@ -17,6 +17,7 @@ import RefundPage from "@/pages/RefundPage";
 import ProfilePage from "@/pages/ProfilePage";
 import WalletPage from "@/pages/WalletPage";
 import MyListingsPage from "@/pages/MyListingsPage";
+import EditListingPage from "@/pages/EditListingPage";
 import MessagesPage from "@/pages/MessagesPage";
 import ChatPage from "@/pages/ChatPage";
 import NotFound from "@/pages/NotFound";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/wallet" element={<WalletPage />} />
               <Route path="/my-listings" element={<MyListingsPage />} />
+              <Route path="/edit-listing/:id" element={<EditListingPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/chat/:id" element={<ChatPage />} />
               <Route path="*" element={<NotFound />} />

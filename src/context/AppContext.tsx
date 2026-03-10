@@ -62,6 +62,7 @@ export interface UserProfile {
   phone: string;
   email: string;
   avatar: string;
+  address?: string;
 }
 
 interface AppState {
@@ -153,7 +154,7 @@ const defaultChatThreads: ChatThread[] = [
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile>({
     id: "user1", username: "John Farmer", phone: "+60123456789",
-    email: "john@agrosave.com", avatar: "👨‍🌾",
+    email: "john@agrosave.com", avatar: "👨‍🌾", address: "123 Farm Road, Kuala Lumpur",
   });
   const [walletBalance, setWalletBalance] = useState(5560.0);
   const [listings, setListings] = useState<Listing[]>(defaultListings);

@@ -11,9 +11,10 @@ const ProfilePage = () => {
   const [username, setUsername] = useState(currentUser.username);
   const [phone, setPhone] = useState(currentUser.phone);
   const [email, setEmail] = useState(currentUser.email);
+  const [address, setAddress] = useState(currentUser.address || "");
 
   const handleSave = () => {
-    setCurrentUser({ ...currentUser, username, phone, email });
+    setCurrentUser({ ...currentUser, username, phone, email, address });
     toast.success("Profile updated!");
   };
 
@@ -46,6 +47,11 @@ const ProfilePage = () => {
           <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
           <input value={email} onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">Address (Default Shipping)</label>
+          <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} placeholder="Enter your default shipping address"
+            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
         </div>
 
         <button onClick={handleSave} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">

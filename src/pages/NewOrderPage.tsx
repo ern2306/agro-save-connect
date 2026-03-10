@@ -4,7 +4,7 @@ import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { toast } from "sonner";
 
-type OrderStep = "actions" | "tracking" | "status" | "shipped";
+type OrderStep = "actions" | "tracking" | "pickup" | "status" | "shipped";
 
 const NewOrderPage = () => {
   const { id } = useParams();
@@ -19,15 +19,12 @@ const NewOrderPage = () => {
   const handlePrepare = () => setStep("tracking");
 
   const handleSubmitTracking = () => {
-    if (!trackingNumber.trim()) {
-      toast.error("Please enter tracking number");
-      return;
-    }
+    if (!trackingNumber.trim()) { toast.error("Please enter tracking number"); return; }
     setOrders(orders.map((o) =>
       o.id === id ? { ...o, status: "preparing" as const, trackingNumber } : o
     ));
-    toast.success("Tracking number saved!");
-    setStep("status");
+    toast.success("Tracking number saved! Courier will pick up soon within 2 days.");
+    setStep("pickup");
   };
 
   const handleOutForDelivery = () => {
@@ -46,7 +43,7 @@ const NewOrderPage = () => {
     setStep("shipped");
   };
 
-  const handleOrderShipped = () => {
+  const handleOrderDelivered = () => {
     setOrders(orders.map((o) =>
       o.id === id ? { ...o, status: "delivered" as const } : o
     ));
@@ -113,12 +110,8 @@ const NewOrderPage = () => {
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Tracking Number</label>
-              <input
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-                placeholder="Enter tracking number"
-                className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
+              <input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Enter tracking number"
+                className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             <button onClick={handleSubmitTracking} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
               Submit Tracking Number
@@ -126,9 +119,12 @@ const NewOrderPage = () => {
           </div>
         )}
 
-        {step === "status" && (
+        {step === "pickup" && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground text-center">Select delivery status:</p>
+            <div className="bg-accent/30 rounded-xl p-4 text-center">
+              <p className="text-sm font-medium text-foreground">📦 Courier will pick up soon within 2 days</p>
+              <p className="text-xs text-muted-foreground mt-1">Tracking: {trackingNumber}</p>
+            </div>
             <button onClick={handleOutForDelivery} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
               Order is Out for Delivery
             </button>
@@ -138,7 +134,7 @@ const NewOrderPage = () => {
         {step === "shipped" && (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground text-center">Order is currently out for delivery</p>
-            <button onClick={handleOrderShipped} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+            <button onClick={handleOrderDelivered} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
               Order is Delivered
             </button>
           </div>
