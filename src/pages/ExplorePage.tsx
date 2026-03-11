@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, MessageCircle } from "lucide-react";
+import { Search } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 
@@ -12,6 +12,9 @@ const ExplorePage = () => {
   const filtered = listings.filter((l) =>
     l.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const surplusListings = listings.filter((l) => l.isSurplus);
+  const regularListings = filtered.filter((l) => !l.isSurplus);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -30,10 +33,39 @@ const ExplorePage = () => {
         </div>
       </div>
 
+      {/* Rescue Crops Section */}
+      {surplusListings.length > 0 && (
+        <div className="px-4 mb-4">
+          <h2 className="font-semibold text-foreground mb-1 flex items-center gap-2">♻️ Rescue Crops</h2>
+          <p className="text-xs text-muted-foreground mb-3">Help reduce food waste by purchasing surplus harvest from farmers.</p>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {surplusListings.map((listing) => (
+              <button
+                key={listing.id}
+                onClick={() => navigate(`/order/${listing.id}`)}
+                className="bg-card rounded-xl overflow-hidden shadow-sm border border-primary/30 text-left min-w-[150px] flex-shrink-0 transition-transform active:scale-[0.98]"
+              >
+                <div className="relative aspect-square bg-primary-light flex items-center justify-center p-3">
+                  <img src={listing.image} alt={listing.name} className="w-full h-full object-contain" />
+                  <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                    Surplus
+                  </span>
+                </div>
+                <div className="p-2.5">
+                  <h3 className="font-medium text-foreground text-xs">{listing.name}</h3>
+                  <p className="text-primary font-bold text-xs">RM {listing.price.toFixed(2)}/kg</p>
+                  <p className="text-muted-foreground text-[10px]">{listing.stock} kg left</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="px-4">
         <h2 className="font-semibold text-foreground mb-3">Fresh Crops</h2>
         <div className="grid grid-cols-2 gap-3">
-          {filtered.map((listing) => (
+          {regularListings.map((listing) => (
             <button
               key={listing.id}
               onClick={() => navigate(`/order/${listing.id}`)}
@@ -51,7 +83,7 @@ const ExplorePage = () => {
             </button>
           ))}
         </div>
-        {filtered.length === 0 && (
+        {regularListings.length === 0 && (
           <p className="text-center text-muted-foreground py-10">No crops found</p>
         )}
       </div>

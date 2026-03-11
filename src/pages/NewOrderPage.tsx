@@ -4,7 +4,7 @@ import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { toast } from "sonner";
 
-type OrderStep = "actions" | "tracking" | "pickup" | "status" | "shipped";
+type OrderStep = "actions" | "tracking" | "pickup";
 
 const NewOrderPage = () => {
   const { id } = useParams();
@@ -23,40 +23,8 @@ const NewOrderPage = () => {
     setOrders(orders.map((o) =>
       o.id === id ? { ...o, status: "preparing" as const, trackingNumber } : o
     ));
-    toast.success("Tracking number saved! Courier will pick up soon within 2 days.");
+    toast.success("Tracking number saved!");
     setStep("pickup");
-  };
-
-  const handleOutForDelivery = () => {
-    setOrders(orders.map((o) =>
-      o.id === id ? { ...o, status: "shipped" as const } : o
-    ));
-    setNotifications([
-      {
-        id: `n${Date.now()}`, type: "order_shipped", title: "Out for Delivery",
-        message: `Order for ${order.listing.name} is out for delivery`, orderId: id!,
-        timestamp: new Date(), read: false,
-      },
-      ...notifications,
-    ]);
-    toast.success("Order is out for delivery!");
-    setStep("shipped");
-  };
-
-  const handleOrderDelivered = () => {
-    setOrders(orders.map((o) =>
-      o.id === id ? { ...o, status: "delivered" as const } : o
-    ));
-    setNotifications([
-      {
-        id: `n${Date.now()}`, type: "order_confirmed", title: "Order Delivered",
-        message: `Order for ${order.listing.name} has been delivered`, orderId: id!,
-        timestamp: new Date(), read: false,
-      },
-      ...notifications,
-    ]);
-    toast.success("Order delivered!");
-    navigate("/notifications");
   };
 
   const handleCancel = () => {
@@ -126,21 +94,13 @@ const NewOrderPage = () => {
 
         {step === "pickup" && (
           <div className="space-y-3">
-            <div className="bg-accent/30 rounded-xl p-4 text-center">
-              <p className="text-sm font-medium text-foreground">📦 Courier will pick up soon within 2 days</p>
-              <p className="text-xs text-muted-foreground mt-1">Tracking: {trackingNumber}</p>
+            <div className="bg-accent/30 rounded-xl p-5 text-center">
+              <p className="text-2xl mb-2">📦</p>
+              <p className="text-sm font-semibold text-foreground">Courier will come to pick up soon within 2 days</p>
+              <p className="text-xs text-muted-foreground mt-2">Tracking Number: {trackingNumber}</p>
             </div>
-            <button onClick={handleOutForDelivery} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
-              Order is Out for Delivery
-            </button>
-          </div>
-        )}
-
-        {step === "shipped" && (
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground text-center">Order is currently out for delivery</p>
-            <button onClick={handleOrderDelivered} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
-              Order is Delivered
+            <button onClick={() => navigate("/notifications")} className="w-full py-3 rounded-xl border border-border text-foreground font-medium text-sm">
+              Back to Notifications
             </button>
           </div>
         )}

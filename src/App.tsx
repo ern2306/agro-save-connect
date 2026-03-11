@@ -20,6 +20,7 @@ import MyListingsPage from "@/pages/MyListingsPage";
 import EditListingPage from "@/pages/EditListingPage";
 import MessagesPage from "@/pages/MessagesPage";
 import ChatPage from "@/pages/ChatPage";
+import DonateSurplusPage from "@/pages/DonateSurplusPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/edit-listing/:id" element={<EditListingPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/chat/:id" element={<ChatPage />} />
+              <Route path="/donate-surplus/:id" element={<DonateSurplusPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />

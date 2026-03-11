@@ -8,6 +8,7 @@ export interface Listing {
   image: string;
   seller: string;
   sellerId: string;
+  isSurplus?: boolean;
 }
 
 export interface Order {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Heart } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { toast } from "sonner";
@@ -25,23 +25,29 @@ const MyListingsPage = () => {
           <p className="text-center text-muted-foreground py-10 text-sm">No listings yet</p>
         )}
         {myListings.map((l) => (
-          <div key={l.id} className="bg-card rounded-xl p-3 flex items-center gap-3 border border-border">
-            <div className="w-14 h-14 rounded-lg bg-primary-light flex items-center justify-center overflow-hidden">
-              {l.image ? <img src={l.image} alt={l.name} className="w-full h-full object-contain" /> : <span className="text-2xl">🌱</span>}
+          <div key={l.id} className="bg-card rounded-xl p-3 border border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-lg bg-primary-light flex items-center justify-center overflow-hidden">
+                {l.image ? <img src={l.image} alt={l.name} className="w-full h-full object-contain" /> : <span className="text-2xl">🌱</span>}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-sm text-foreground">{l.name}</h3>
+                <p className="text-primary font-bold text-sm">RM {l.price.toFixed(2)}/kg</p>
+                <p className="text-xs text-muted-foreground">{l.stock} kg in stock</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-sm text-foreground">{l.name}</h3>
-              <p className="text-primary font-bold text-sm">RM {l.price.toFixed(2)}/kg</p>
-              <p className="text-xs text-muted-foreground">{l.stock} kg in stock</p>
-            </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-3">
               <button onClick={() => navigate(`/edit-listing/${l.id}`)}
-                className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center">
-                <Pencil className="w-3.5 h-3.5 text-primary" />
+                className="flex-1 py-2 rounded-lg bg-primary-light text-primary text-xs font-medium flex items-center justify-center gap-1.5">
+                <Pencil className="w-3.5 h-3.5" /> Edit
               </button>
               <button onClick={() => setDeleteId(l.id)}
-                className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
-                <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                className="flex-1 py-2 rounded-lg bg-destructive/10 text-destructive text-xs font-medium flex items-center justify-center gap-1.5">
+                <Trash2 className="w-3.5 h-3.5" /> Delete
+              </button>
+              <button onClick={() => navigate(`/donate-surplus/${l.id}`)}
+                className="flex-1 py-2 rounded-lg border border-primary text-primary text-xs font-medium flex items-center justify-center gap-1.5">
+                <Heart className="w-3.5 h-3.5" /> Donate Surplus
               </button>
             </div>
           </div>
