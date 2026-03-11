@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingCart, Minus, Plus, MessageCircle } from "lucide-react";
+import { ShoppingCart, Minus, Plus, MessageCircle, MapPin, Store } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
+import FreshnessIndicator from "@/components/FreshnessIndicator";
 import { toast } from "sonner";
+
+const sourceTypeIcons: Record<string, string> = {
+  Restaurant: "🍽️",
+  Farm: "🌾",
+  Supermarket: "🏪",
+  "Community Donor": "🤝",
+};
 
 const OrderPage = () => {
   const { id } = useParams();
@@ -61,14 +69,12 @@ const OrderPage = () => {
       { id: `t${Date.now()}`, type: "purchase" as const, amount: -total, description: `Purchase: ${listing.name}`, timestamp: new Date() },
       ...transactions,
     ]);
-    // Buyer notification goes to "My Notifications" (order_confirmed type)
     setNotifications([
       {
         id: `n${Date.now()}`, type: "order_confirmed", title: "Order Placed",
         message: `Your order for ${listing.name} x${qty}kg has been placed`, orderId: newOrder.id,
         timestamp: new Date(), read: false,
       },
-      // Seller notification goes to "Seller Updates" (new_order type)
       {
         id: `n${Date.now() + 1}`, type: "new_order", title: "New Order",
         message: `New order received: ${listing.name} x${qty}kg`, orderId: newOrder.id,
@@ -93,11 +99,55 @@ const OrderPage = () => {
             <p className="text-primary font-bold text-lg">RM {listing.price.toFixed(2)}/kg</p>
             <p className="text-sm text-muted-foreground">{listing.stock} kg available</p>
             <p className="text-sm text-muted-foreground">Seller: {listing.seller}</p>
+
+            {/* Freshness Indicator */}
+            {listing.freshness && (
+              <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs font-semibold text-foreground mb-1">Food Freshness Level</p>
+                <FreshnessIndicator level={listing.freshness} />
+                {listing.bestBefore && (
+                  <p className="text-xs text-muted-foreground mt-1">Best before: <span className="font-medium text-foreground">{listing.bestBefore}</span></p>
+                )}
+              </div>
+            )}
+
+            {/* Food Source Info */}
+            {listing.source && (
+              <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1">
+                  <Store className="w-3.5 h-3.5" /> Food Source
+                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span>{sourceTypeIcons[listing.source.type] || "📦"}</span>
+                    <span className="text-foreground font-medium">{listing.source.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <MapPin className="w-3 h-3" />
+                    <span>{listing.source.location}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Distance from you: <span className="font-medium text-foreground">{listing.source.distance} km</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Source Type: <span className="font-medium text-foreground">{listing.source.type}</span>
+                  </p>
+                </div>
+                {listing.freshness && listing.freshness >= 4 && (
+                  <p className="text-[10px] text-primary mt-2 font-medium">
+                    If ordered before 2:00 PM, courier will pick up today.
+                  </p>
+                )}
+              </div>
+            )}
+
             {listing.sellerId !== currentUser.id && (
-              <button onClick={handleMessageSeller}
-                className="mt-3 py-2 px-4 rounded-lg border border-primary text-primary text-sm font-medium flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" /> Message Seller
-              </button>
+              <div className="flex gap-2 mt-3">
+                <button onClick={handleMessageSeller}
+                  className="py-2 px-4 rounded-lg border border-primary text-primary text-sm font-medium flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" /> Chat With Seller
+                </button>
+              </div>
             )}
           </div>
         </div>

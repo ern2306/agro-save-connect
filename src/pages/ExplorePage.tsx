@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
+import FreshnessIndicator from "@/components/FreshnessIndicator";
 
 const ExplorePage = () => {
   const { listings } = useApp();
@@ -55,6 +56,10 @@ const ExplorePage = () => {
                   <h3 className="font-medium text-foreground text-xs">{listing.name}</h3>
                   <p className="text-primary font-bold text-xs">RM {listing.price.toFixed(2)}/kg</p>
                   <p className="text-muted-foreground text-[10px]">{listing.stock} kg left</p>
+                  {listing.freshness && <FreshnessIndicator level={listing.freshness} compact />}
+                  {listing.source && (
+                    <p className="text-muted-foreground text-[10px] mt-0.5">📍 {listing.source.distance} km away</p>
+                  )}
                 </div>
               </button>
             ))}
@@ -78,6 +83,16 @@ const ExplorePage = () => {
                 <h3 className="font-medium text-foreground text-sm">{listing.name}</h3>
                 <p className="text-primary font-bold text-sm">RM {listing.price.toFixed(2)}/kg</p>
                 <p className="text-muted-foreground text-xs">{listing.stock} kg left</p>
+                {listing.freshness && (
+                  <div className="mt-1">
+                    <FreshnessIndicator level={listing.freshness} compact />
+                  </div>
+                )}
+                {listing.source && (
+                  <p className="text-muted-foreground text-[10px] mt-0.5">
+                    📍 {listing.source.name} · {listing.source.distance} km
+                  </p>
+                )}
                 <p className="text-muted-foreground text-xs mt-1">by {listing.seller}</p>
               </div>
             </button>
