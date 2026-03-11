@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
+export interface FoodSource {
+  name: string;
+  type: "Restaurant" | "Farm" | "Supermarket" | "Community Donor";
+  location: string;
+  distance: number;
+}
+
+export type FreshnessLevel = 1 | 2 | 3 | 4 | 5;
+
 export interface Listing {
   id: string;
   name: string;
@@ -9,6 +18,9 @@ export interface Listing {
   seller: string;
   sellerId: string;
   isSurplus?: boolean;
+  source?: FoodSource;
+  freshness?: FreshnessLevel;
+  bestBefore?: string;
 }
 
 export interface Order {
