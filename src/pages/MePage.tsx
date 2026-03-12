@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { User, Wallet, ShoppingBag, ChevronRight } from "lucide-react";
+import { User, Wallet, ShoppingBag, ChevronRight, MapPin } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 
@@ -12,6 +12,7 @@ const MePage = () => {
     { icon: User, label: "Profile", path: "/profile", desc: "Edit your details" },
     { icon: Wallet, label: "Wallet", path: "/wallet", desc: `RM ${walletBalance.toFixed(2)}` },
     { icon: ShoppingBag, label: "My Listings", path: "/my-listings", desc: `${myListings.length} items` },
+    { icon: MapPin, label: "Community Food Map", path: "/community-map", desc: "View food supply & demand" },
   ];
 
   return (
@@ -19,7 +20,6 @@ const MePage = () => {
       <PageHeader title="Me" />
 
       <div className="px-4 py-6">
-        {/* Avatar and info */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center text-3xl mb-2">
             {currentUser.avatar}

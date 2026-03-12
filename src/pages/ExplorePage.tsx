@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, MapPin as MapPinIcon } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import FreshnessIndicator from "@/components/FreshnessIndicator";
@@ -32,6 +32,22 @@ const ExplorePage = () => {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
+      </div>
+
+      {/* Community Food Map Link */}
+      <div className="px-4 mb-3">
+        <button
+          onClick={() => navigate("/community-map")}
+          className="w-full bg-primary/10 rounded-xl p-3 flex items-center gap-3 border border-primary/20"
+        >
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+            <MapPinIcon className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div className="text-left flex-1">
+            <h3 className="font-medium text-sm text-foreground">🗺️ Community Food Map</h3>
+            <p className="text-xs text-muted-foreground">View nearby food supply & demand in real-time</p>
+          </div>
+        </button>
       </div>
 
       {/* Rescue Crops Section */}

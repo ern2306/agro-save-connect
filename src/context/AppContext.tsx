@@ -34,6 +34,10 @@ export interface Order {
   trackingNumber?: string;
   createdAt: Date;
   address: string;
+  cancelledBy?: "buyer" | "seller";
+  refundStatus?: "none" | "requested" | "processed";
+  buyerName?: string;
+  buyerPhone?: string;
 }
 
 export interface ChatMessage {
@@ -53,7 +57,7 @@ export interface ChatThread {
 
 export interface Notification {
   id: string;
-  type: "order_shipped" | "order_confirmed" | "order_cancelled" | "new_order" | "order_cancelled_seller";
+  type: "order_shipped" | "order_confirmed" | "order_cancelled" | "new_order" | "order_cancelled_seller" | "order_preparing";
   title: string;
   message: string;
   orderId: string;
@@ -78,6 +82,18 @@ export interface UserProfile {
   address?: string;
 }
 
+export interface ScanRecord {
+  id: string;
+  plantName: string;
+  result: "Healthy" | "Pest Detected";
+  timestamp: Date;
+}
+
+export const generateTrackingNumber = () => {
+  const digits = Math.floor(100000000 + Math.random() * 900000000);
+  return `TRK${digits}`;
+};
+
 interface AppState {
   currentUser: UserProfile;
   setCurrentUser: React.Dispatch<React.SetStateAction<UserProfile>>;
@@ -93,6 +109,8 @@ interface AppState {
   setChatThreads: React.Dispatch<React.SetStateAction<ChatThread[]>>;
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  scanHistory: ScanRecord[];
+  setScanHistory: React.Dispatch<React.SetStateAction<ScanRecord[]>>;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -129,8 +147,8 @@ const defaultListings: Listing[] = [
 ];
 
 const defaultNotifications: Notification[] = [
-  { id: "n1", type: "order_confirmed", title: "Order Confirmed", message: "Your order #1001 has been confirmed", orderId: "o1", timestamp: new Date(Date.now() - 3600000), read: false },
-  { id: "n2", type: "order_shipped", title: "Order Shipped", message: "Your order #1002 has been shipped", orderId: "o2", timestamp: new Date(Date.now() - 7200000), read: false },
+  { id: "n1", type: "order_confirmed", title: "Order Confirmed", message: "Your order #1001 has been confirmed. Seller: Farmer Ali, Phone: +60198765432, Address: Serdang, Selangor. Tracking: TRK928347123", orderId: "o1", timestamp: new Date(Date.now() - 3600000), read: false },
+  { id: "n2", type: "order_shipped", title: "Order Shipped", message: "Your order #1002 has been shipped. Seller: Farmer Siti, Phone: +60187654321, Address: Cameron Highlands, Pahang. Tracking: MY123456789", orderId: "o2", timestamp: new Date(Date.now() - 7200000), read: false },
   { id: "n3", type: "new_order", title: "New Order", message: "You received a new order for Potato", orderId: "o3", timestamp: new Date(Date.now() - 1800000), read: false },
 ];
 
@@ -139,16 +157,19 @@ const defaultOrders: Order[] = [
     id: "o1", listing: defaultListings[0], quantity: 5, totalPrice: 17.5,
     status: "confirmed", buyerId: "user1", sellerId: "seller1",
     createdAt: new Date(Date.now() - 86400000), address: "123 Farm Road, Kuala Lumpur",
+    buyerName: "John Farmer", buyerPhone: "+60123456789",
   },
   {
     id: "o2", listing: defaultListings[1], quantity: 3, totalPrice: 15.0,
     status: "shipped", buyerId: "user1", sellerId: "seller2", trackingNumber: "MY123456789",
     createdAt: new Date(Date.now() - 172800000), address: "456 Green Street, Penang",
+    buyerName: "John Farmer", buyerPhone: "+60123456789",
   },
   {
     id: "o3", listing: defaultListings[0], quantity: 10, totalPrice: 35.0,
     status: "pending", buyerId: "buyer1", sellerId: "user1",
     createdAt: new Date(Date.now() - 900000), address: "789 Market Ave, Johor",
+    buyerName: "Ahmad", buyerPhone: "+60176543210",
   },
 ];
 
@@ -186,12 +207,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     { id: "t2", type: "purchase", amount: -17.5, description: "Purchase: Potato", timestamp: new Date(Date.now() - 86400000) },
     { id: "t3", type: "sale", amount: 35.0, description: "Sale: Potato x10", timestamp: new Date(Date.now() - 3600000) },
   ]);
+  const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
 
   return (
     <AppContext.Provider value={{
       currentUser, setCurrentUser, walletBalance, setWalletBalance,
       listings, setListings, orders, setOrders, notifications, setNotifications,
       chatThreads, setChatThreads, transactions, setTransactions,
+      scanHistory, setScanHistory,
     }}>
       {children}
     </AppContext.Provider>
