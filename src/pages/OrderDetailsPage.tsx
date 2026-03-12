@@ -1,14 +1,17 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft } from "lucide-react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft, Copy, Search, Printer, Phone, User } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { orders } = useApp();
+  const { orders, setOrders, notifications, setNotifications } = useApp();
   const order = orders.find((o) => o.id === id);
+  const fromSeller = searchParams.get("from") === "seller";
 
   if (!order) return <div className="p-4">Order not found</div>;
 
@@ -22,6 +25,22 @@ const OrderDetailsPage = () => {
 
   const statusIndex = statusSteps.findIndex((s) => s.key === order.status);
   const isCancelled = order.status === "cancelled";
+
+  const handleBuyerCancel = () => {
+    setOrders(orders.map((o) =>
+      o.id === id ? { ...o, status: "cancelled" as const, cancelledBy: "buyer" as const, refundStatus: "requested" as const } : o
+    ));
+    setNotifications([
+      {
+        id: `n${Date.now()}`, type: "order_cancelled_seller" as const, title: "Order Cancelled by Buyer",
+        message: `The buyer has cancelled the order for ${order.listing.name}. Refund has been requested.`,
+        orderId: id!, timestamp: new Date(), read: false,
+      },
+      ...notifications,
+    ]);
+    toast.info("Order cancelled. Refund requested.");
+    navigate("/notifications");
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -37,26 +56,57 @@ const OrderDetailsPage = () => {
           </div>
         </div>
 
+        {/* Delivery Information with seller details */}
         <div className="bg-card rounded-xl p-4 border border-border space-y-2">
           <h3 className="font-medium text-foreground text-sm">Delivery Information</h3>
-          <div className="flex items-start gap-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="w-4 h-4 text-primary" />
+            <span>{order.listing.seller}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="w-4 h-4 text-primary" />
+            <span>+60198765432</span>
+          </div>
+          <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 text-primary mt-0.5" />
-            <p className="text-sm text-muted-foreground">{order.address}</p>
+            <span>{order.address}</span>
           </div>
           {order.trackingNumber && (
-            <div className="flex items-start gap-2">
-              <Truck className="w-4 h-4 text-primary mt-0.5" />
-              <p className="text-sm text-muted-foreground">Tracking: {order.trackingNumber}</p>
+            <div className="pt-2 border-t border-border">
+              <div className="flex items-start gap-2">
+                <Truck className="w-4 h-4 text-primary mt-0.5" />
+                <span className="text-sm font-medium text-foreground">Tracking: {order.trackingNumber}</span>
+              </div>
+              {/* Seller updates get action buttons */}
+              {fromSeller && (
+                <div className="flex gap-2 mt-2">
+                  <button onClick={() => { navigator.clipboard.writeText(order.trackingNumber!); toast.success("Copied!"); }}
+                    className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
+                    <Copy className="w-3 h-3" /> Copy
+                  </button>
+                  <button onClick={() => toast.info("Tracking feature coming soon")}
+                    className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
+                    <Search className="w-3 h-3" /> Track Package
+                  </button>
+                  <button onClick={() => toast.info("Print label feature coming soon")}
+                    className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
+                    <Printer className="w-3 h-3" /> Print Label
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
 
+        {/* Order Timeline */}
         <div className="bg-card rounded-xl p-4 border border-border">
           <h3 className="font-medium text-foreground text-sm mb-4">Order Timeline</h3>
           {isCancelled ? (
             <div className="flex items-center gap-3">
               <XCircle className="w-5 h-5 text-destructive" />
-              <span className="text-destructive font-medium text-sm">Order Cancelled</span>
+              <span className="text-destructive font-medium text-sm">
+                Order Cancelled{order.cancelledBy ? ` by ${order.cancelledBy}` : ""}
+              </span>
             </div>
           ) : (
             <div className="space-y-4">
@@ -78,6 +128,14 @@ const OrderDetailsPage = () => {
             </div>
           )}
         </div>
+
+        {/* Buyer cancel button */}
+        {!isCancelled && !fromSeller && order.status !== "delivered" && (
+          <button onClick={handleBuyerCancel}
+            className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-semibold text-sm">
+            Cancel Order
+          </button>
+        )}
 
         <button onClick={() => navigate("/explore")}
           className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">

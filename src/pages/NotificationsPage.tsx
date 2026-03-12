@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Package, CheckCircle, XCircle, ShoppingBag } from "lucide-react";
+import { Package, CheckCircle, XCircle, ShoppingBag, Truck } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
@@ -14,7 +14,7 @@ const NotificationsPage = () => {
     ["order_shipped", "order_confirmed", "order_cancelled"].includes(n.type)
   );
   const sellerNotifs = notifications.filter((n) =>
-    ["new_order", "order_cancelled_seller"].includes(n.type)
+    ["new_order", "order_cancelled_seller", "order_preparing"].includes(n.type)
   );
 
   const current = tab === "buyer" ? buyerNotifs : sellerNotifs;
@@ -26,6 +26,7 @@ const NotificationsPage = () => {
       case "order_cancelled":
       case "order_cancelled_seller": return <XCircle className="w-5 h-5 text-destructive" />;
       case "new_order": return <ShoppingBag className="w-5 h-5 text-primary" />;
+      case "order_preparing": return <Truck className="w-5 h-5 text-primary" />;
       default: return <Package className="w-5 h-5 text-muted-foreground" />;
     }
   };
@@ -33,6 +34,7 @@ const NotificationsPage = () => {
   const handleClick = (n: typeof notifications[0]) => {
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
     else if (n.type === "order_cancelled" || n.type === "order_cancelled_seller") navigate(`/refund/${n.orderId}`);
+    else if (n.type === "order_preparing") navigate(`/order-details/${n.orderId}?from=seller`);
     else navigate(`/order-details/${n.orderId}`);
   };
 

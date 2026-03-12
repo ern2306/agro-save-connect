@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingCart, Minus, Plus, MessageCircle, MapPin, Store } from "lucide-react";
-import { useApp } from "@/context/AppContext";
+import { useApp, generateTrackingNumber } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import FreshnessIndicator from "@/components/FreshnessIndicator";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ const OrderPage = () => {
       return;
     }
     setWalletBalance((b) => b - total);
+    const trackingNumber = generateTrackingNumber();
     const newOrder = {
       id: `o${Date.now()}`,
       listing,
@@ -61,8 +62,11 @@ const OrderPage = () => {
       status: "pending" as const,
       buyerId: currentUser.id,
       sellerId: listing.sellerId,
+      trackingNumber,
       createdAt: new Date(),
       address: currentUser.address || "123 Farm Road, KL",
+      buyerName: currentUser.username,
+      buyerPhone: currentUser.phone,
     };
     setOrders([newOrder, ...orders]);
     setTransactions([
@@ -72,8 +76,8 @@ const OrderPage = () => {
     setNotifications([
       {
         id: `n${Date.now()}`, type: "order_confirmed", title: "Order Placed",
-        message: `Your order for ${listing.name} x${qty}kg has been placed`, orderId: newOrder.id,
-        timestamp: new Date(), read: false,
+        message: `Your order for ${listing.name} x${qty}kg has been placed. Seller: ${listing.seller}, Phone: +60198765432, Address: ${listing.source?.location || "N/A"}. Tracking: ${trackingNumber}`,
+        orderId: newOrder.id, timestamp: new Date(), read: false,
       },
       {
         id: `n${Date.now() + 1}`, type: "new_order", title: "New Order",
@@ -100,7 +104,6 @@ const OrderPage = () => {
             <p className="text-sm text-muted-foreground">{listing.stock} kg available</p>
             <p className="text-sm text-muted-foreground">Seller: {listing.seller}</p>
 
-            {/* Freshness Indicator */}
             {listing.freshness && (
               <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
                 <p className="text-xs font-semibold text-foreground mb-1">Food Freshness Level</p>
@@ -111,7 +114,6 @@ const OrderPage = () => {
               </div>
             )}
 
-            {/* Food Source Info */}
             {listing.source && (
               <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
                 <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1">
