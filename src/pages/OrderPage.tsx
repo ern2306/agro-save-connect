@@ -24,6 +24,15 @@ const OrderPage = () => {
 
   const total = listing.price * qty;
 
+  const handleQtyChange = (value: string) => {
+    const parsed = parseInt(value);
+    if (isNaN(parsed) || parsed < 1) {
+      setQty(1);
+    } else {
+      setQty(Math.min(listing.stock, parsed));
+    }
+  };
+
   const handleMessageSeller = () => {
     if (listing.sellerId === currentUser.id) {
       toast.info("This is your own listing");
@@ -160,7 +169,14 @@ const OrderPage = () => {
             <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center">
               <Minus className="w-4 h-4 text-primary" />
             </button>
-            <span className="text-lg font-semibold w-12 text-center">{qty}</span>
+            <input
+              type="number"
+              value={qty}
+              onChange={(e) => handleQtyChange(e.target.value)}
+              className="w-16 text-center text-lg font-semibold bg-background border border-border rounded-lg py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              min={1}
+              max={listing.stock}
+            />
             <button onClick={() => setQty(Math.min(listing.stock, qty + 1))} className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center">
               <Plus className="w-4 h-4 text-primary" />
             </button>

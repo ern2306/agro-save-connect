@@ -57,7 +57,7 @@ export interface ChatThread {
 
 export interface Notification {
   id: string;
-  type: "order_shipped" | "order_confirmed" | "order_cancelled" | "new_order" | "order_cancelled_seller" | "order_preparing";
+  type: "order_shipped" | "order_confirmed" | "order_cancelled" | "new_order" | "order_cancelled_seller" | "order_preparing" | "donation";
   title: string;
   message: string;
   orderId: string;
@@ -87,6 +87,11 @@ export interface ScanRecord {
   plantName: string;
   result: "Healthy" | "Pest Detected";
   timestamp: Date;
+  treatment?: {
+    nutrient: string;
+    watering: string;
+    pesticide: string;
+  };
 }
 
 export const generateTrackingNumber = () => {
@@ -192,6 +197,27 @@ const defaultChatThreads: ChatThread[] = [
   },
 ];
 
+const defaultScanHistory: ScanRecord[] = [
+  {
+    id: "scan1", plantName: "Chili Plant", result: "Pest Detected",
+    timestamp: new Date(Date.now() - 86400000),
+    treatment: {
+      nutrient: "Add Nitrogen fertilizer: 10g per plant. Mix 2 tablespoons of compost fertilizer with 1 litre of water and apply every 3 days.",
+      watering: "Water 2 times per day. Add 2 cups (500ml) at 7AM and 6PM directly to the root area.",
+      pesticide: "Spray organic pesticide every 3 days. Dilute 5ml of neem oil in 1 litre of water and spray on both sides of leaves for 2 weeks.",
+    },
+  },
+  {
+    id: "scan2", plantName: "Tomato", result: "Pest Detected",
+    timestamp: new Date(Date.now() - 172800000),
+    treatment: {
+      nutrient: "Add Nitrogen fertilizer: 10g per plant. Mix 2 tablespoons of compost fertilizer with 1 litre of water and apply every 3 days.",
+      watering: "Water 2 times per day. Add 2 cups (500ml) at 7AM and 6PM directly to the root area.",
+      pesticide: "Spray organic pesticide every 3 days. Dilute 5ml of neem oil in 1 litre of water and spray on both sides of leaves for 2 weeks.",
+    },
+  },
+];
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile>({
     id: "user1", username: "John Farmer", phone: "+60123456789",
@@ -207,7 +233,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     { id: "t2", type: "purchase", amount: -17.5, description: "Purchase: Potato", timestamp: new Date(Date.now() - 86400000) },
     { id: "t3", type: "sale", amount: 35.0, description: "Sale: Potato x10", timestamp: new Date(Date.now() - 3600000) },
   ]);
-  const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
+  const [scanHistory, setScanHistory] = useState<ScanRecord[]>(defaultScanHistory);
 
   return (
     <AppContext.Provider value={{

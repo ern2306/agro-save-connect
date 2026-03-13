@@ -9,9 +9,10 @@ const OrderDetailsPage = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { orders, setOrders, notifications, setNotifications } = useApp();
+  const { orders, setOrders, notifications, setNotifications, walletBalance, setWalletBalance, transactions, setTransactions } = useApp();
   const order = orders.find((o) => o.id === id);
   const fromSeller = searchParams.get("from") === "seller";
+  const fromNotification = searchParams.get("from") === "notification";
 
   if (!order) return <div className="p-4">Order not found</div>;
 
@@ -27,18 +28,24 @@ const OrderDetailsPage = () => {
   const isCancelled = order.status === "cancelled";
 
   const handleBuyerCancel = () => {
+    // Deduct refund from seller wallet
+    setWalletBalance((b) => b - order.totalPrice);
+    setTransactions([
+      { id: `t${Date.now()}`, type: "refund" as const, amount: -order.totalPrice, description: `Refund: ${order.listing.name}`, timestamp: new Date() },
+      ...transactions,
+    ]);
     setOrders(orders.map((o) =>
       o.id === id ? { ...o, status: "cancelled" as const, cancelledBy: "buyer" as const, refundStatus: "requested" as const } : o
     ));
     setNotifications([
       {
         id: `n${Date.now()}`, type: "order_cancelled_seller" as const, title: "Order Cancelled by Buyer",
-        message: `The buyer has cancelled the order for ${order.listing.name}. Refund has been requested.`,
+        message: `The buyer has cancelled the order for ${order.listing.name}. Refund has been completed by system.`,
         orderId: id!, timestamp: new Date(), read: false,
       },
       ...notifications,
     ]);
-    toast.info("Order cancelled. Refund requested.");
+    toast.info("Order cancelled. Refund processed.");
     navigate("/notifications");
   };
 
@@ -56,7 +63,6 @@ const OrderDetailsPage = () => {
           </div>
         </div>
 
-        {/* Delivery Information with seller details */}
         <div className="bg-card rounded-xl p-4 border border-border space-y-2">
           <h3 className="font-medium text-foreground text-sm">Delivery Information</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -77,7 +83,6 @@ const OrderDetailsPage = () => {
                 <Truck className="w-4 h-4 text-primary mt-0.5" />
                 <span className="text-sm font-medium text-foreground">Tracking: {order.trackingNumber}</span>
               </div>
-              {/* Seller updates get action buttons */}
               {fromSeller && (
                 <div className="flex gap-2 mt-2">
                   <button onClick={() => { navigator.clipboard.writeText(order.trackingNumber!); toast.success("Copied!"); }}
@@ -88,7 +93,7 @@ const OrderDetailsPage = () => {
                     className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
                     <Search className="w-3 h-3" /> Track Package
                   </button>
-                  <button onClick={() => toast.info("Print label feature coming soon")}
+                  <button onClick={() => navigate(`/print-label/${order.trackingNumber}`)}
                     className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
                     <Printer className="w-3 h-3" /> Print Label
                   </button>
@@ -98,7 +103,6 @@ const OrderDetailsPage = () => {
           )}
         </div>
 
-        {/* Order Timeline */}
         <div className="bg-card rounded-xl p-4 border border-border">
           <h3 className="font-medium text-foreground text-sm mb-4">Order Timeline</h3>
           {isCancelled ? (
@@ -129,8 +133,8 @@ const OrderDetailsPage = () => {
           )}
         </div>
 
-        {/* Buyer cancel button */}
-        {!isCancelled && !fromSeller && order.status !== "delivered" && (
+        {/* Cancel button: only show when NOT from notification and NOT from seller view */}
+        {!isCancelled && !fromSeller && !fromNotification && order.status !== "delivered" && (
           <button onClick={handleBuyerCancel}
             className="w-full py-3 rounded-xl bg-destructive text-destructive-foreground font-semibold text-sm">
             Cancel Order

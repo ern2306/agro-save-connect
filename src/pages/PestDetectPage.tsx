@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Camera, ShieldCheck, AlertTriangle, Droplets, Leaf, Bug, History } from "lucide-react";
+import { Camera, ShieldCheck, AlertTriangle, Droplets, Leaf, Bug, History, ChevronRight, ArrowLeft } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { useApp } from "@/context/AppContext";
 import type { ScanRecord } from "@/context/AppContext";
@@ -8,9 +8,16 @@ type ScanResult = null | "clean" | "infected";
 
 const plantNames = ["Tomato", "Chili Plant", "Cucumber", "Kangkung", "Broccoli", "Potato", "Cabbage"];
 
+const defaultTreatment = {
+  nutrient: "Add Nitrogen fertilizer: 10g per plant. Mix 2 tablespoons of compost fertilizer with 1 litre of water and apply every 3 days.",
+  watering: "Water 2 times per day. Add 2 cups (500ml) at 7AM and 6PM directly to the root area.",
+  pesticide: "Spray organic pesticide every 3 days. Dilute 5ml of neem oil in 1 litre of water and spray on both sides of leaves for 2 weeks.",
+};
+
 const PestDetectPage = () => {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult>(null);
+  const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
   const { scanHistory, setScanHistory } = useApp();
 
   const healthyCount = scanHistory.filter((s) => s.result === "Healthy").length;
@@ -31,10 +38,60 @@ const PestDetectPage = () => {
         plantName,
         result: isInfected ? "Pest Detected" : "Healthy",
         timestamp: new Date(),
+        treatment: isInfected ? defaultTreatment : undefined,
       };
       setScanHistory((prev) => [record, ...prev]);
     }, 2500);
   };
+
+  // Detail view for a scan record
+  if (selectedScan) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <PageHeader title="Scan Details" showBack />
+        <div className="px-4 py-6 space-y-4">
+          <button onClick={() => setSelectedScan(null)} className="flex items-center gap-1 text-sm text-primary font-medium">
+            <ArrowLeft className="w-4 h-4" /> Back to History
+          </button>
+
+          <div className={`rounded-xl p-4 ${selectedScan.result === "Healthy" ? "bg-accent" : "bg-destructive/10"}`}>
+            <div className="flex items-center gap-2 mb-2">
+              {selectedScan.result === "Healthy"
+                ? <ShieldCheck className="w-6 h-6 text-success" />
+                : <AlertTriangle className="w-6 h-6 text-destructive" />
+              }
+              <h3 className="font-semibold text-foreground">{selectedScan.result}</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">Plant: {selectedScan.plantName}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Scanned: {selectedScan.timestamp.toLocaleString()}
+            </p>
+          </div>
+
+          {selectedScan.treatment && (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm text-foreground">Treatment Recommendation</h4>
+              {[
+                { icon: Leaf, title: "Nutrient Recommendation", desc: selectedScan.treatment.nutrient },
+                { icon: Droplets, title: "Watering Recommendation", desc: selectedScan.treatment.watering },
+                { icon: Bug, title: "Pest Treatment", desc: selectedScan.treatment.pesticide },
+              ].map((s, i) => (
+                <div key={i} className="bg-card rounded-xl p-3 flex items-start gap-3 border border-border">
+                  <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
+                    <s.icon className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm text-foreground">{s.title}</h4>
+                    <p className="text-xs text-muted-foreground">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -88,9 +145,9 @@ const PestDetectPage = () => {
             <h4 className="font-semibold text-sm text-foreground">Treatment Recommendation</h4>
             <div className="space-y-2">
               {[
-                { icon: Leaf, title: "Nutrient Recommendation", desc: "Add Nitrogen fertilizer: 10g per plant. Mix 2 tablespoons of compost fertilizer with 1 litre of water and apply every 3 days." },
-                { icon: Droplets, title: "Watering Recommendation", desc: "Water 2 times per day. Add 2 cups (500ml) at 7AM and 6PM directly to the root area." },
-                { icon: Bug, title: "Pest Treatment", desc: "Spray organic pesticide every 3 days. Dilute 5ml of neem oil in 1 litre of water and spray on both sides of leaves for 2 weeks." },
+                { icon: Leaf, title: "Nutrient Recommendation", desc: defaultTreatment.nutrient },
+                { icon: Droplets, title: "Watering Recommendation", desc: defaultTreatment.watering },
+                { icon: Bug, title: "Pest Treatment", desc: defaultTreatment.pesticide },
               ].map((s, i) => (
                 <div key={i} className="bg-card rounded-xl p-3 flex items-start gap-3 border border-border">
                   <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center shrink-0">
@@ -112,7 +169,6 @@ const PestDetectPage = () => {
             <History className="w-4 h-4 text-primary" /> Detection History
           </h3>
 
-          {/* Summary */}
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="bg-card rounded-lg p-3 text-center border border-border">
               <p className="text-lg font-bold text-foreground">{scanHistory.length}</p>
@@ -128,13 +184,13 @@ const PestDetectPage = () => {
             </div>
           </div>
 
-          {/* History List */}
           {scanHistory.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">No scans yet. Start scanning!</p>
           ) : (
             <div className="space-y-2">
-              {scanHistory.slice(0, 10).map((scan, i) => (
-                <div key={scan.id} className="bg-card rounded-lg p-3 border border-border flex items-center gap-3">
+              {scanHistory.slice(0, 10).map((scan) => (
+                <button key={scan.id} onClick={() => setSelectedScan(scan)}
+                  className="w-full bg-card rounded-lg p-3 border border-border flex items-center gap-3 text-left">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${scan.result === "Healthy" ? "bg-primary-light" : "bg-destructive/10"}`}>
                     {scan.result === "Healthy"
                       ? <ShieldCheck className="w-4 h-4 text-primary" />
@@ -145,10 +201,13 @@ const PestDetectPage = () => {
                     <p className="text-sm font-medium text-foreground">{scan.plantName}</p>
                     <p className={`text-xs ${scan.result === "Healthy" ? "text-primary" : "text-destructive"}`}>{scan.result}</p>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    {scan.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </div>
+                  <div className="flex items-center gap-1">
+                    <p className="text-[10px] text-muted-foreground">
+                      {scan.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                  </div>
+                </button>
               ))}
             </div>
           )}

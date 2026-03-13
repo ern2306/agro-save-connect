@@ -8,7 +8,7 @@ import { toast } from "sonner";
 const NewOrderPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { orders, setOrders, notifications, setNotifications, currentUser } = useApp();
+  const { orders, setOrders, notifications, setNotifications, currentUser, walletBalance, setWalletBalance, transactions, setTransactions } = useApp();
   const order = orders.find((o) => o.id === id);
   const [prepared, setPrepared] = useState(false);
   const [generatedTracking, setGeneratedTracking] = useState("");
@@ -34,13 +34,19 @@ const NewOrderPage = () => {
   };
 
   const handleCancel = () => {
+    // Deduct refund from seller wallet
+    setWalletBalance((b) => b - order.totalPrice);
+    setTransactions([
+      { id: `t${Date.now()}`, type: "refund" as const, amount: -order.totalPrice, description: `Refund: ${order.listing.name}`, timestamp: new Date() },
+      ...transactions,
+    ]);
     setOrders(orders.map((o) =>
       o.id === id ? { ...o, status: "cancelled" as const, cancelledBy: "seller" as const, refundStatus: "processed" as const } : o
     ));
     setNotifications([
       {
-        id: `n${Date.now()}`, type: "order_cancelled_seller" as const, title: "Order Cancelled by You",
-        message: `You cancelled the order for ${order.listing.name}. Refund has been processed to the buyer.`,
+        id: `n${Date.now()}`, type: "order_cancelled_seller" as const, title: "Order Cancelled",
+        message: `Order for ${order.listing.name} has been cancelled. Refund has been completed by system.`,
         orderId: id!, timestamp: new Date(), read: false,
       },
       ...notifications,
@@ -62,7 +68,6 @@ const NewOrderPage = () => {
     <div className="min-h-screen bg-background pb-20">
       <PageHeader title="New Order" showBack />
       <div className="px-4 py-4 space-y-4">
-        {/* Order card with buyer info */}
         <div className="bg-card rounded-xl p-4 border border-border">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-14 h-14 rounded-lg bg-primary-light flex items-center justify-center overflow-hidden">
@@ -89,7 +94,6 @@ const NewOrderPage = () => {
           </div>
         </div>
 
-        {/* Actions or Pickup Status */}
         {!showPickup && order.status !== "cancelled" && (
           <div className="flex gap-3">
             <button onClick={handlePrepare} className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
@@ -103,7 +107,6 @@ const NewOrderPage = () => {
 
         {showPickup && (
           <div className="space-y-4">
-            {/* Tracking Number */}
             <div className="bg-card rounded-xl p-4 border border-border">
               <p className="text-xs font-semibold text-foreground mb-2">Tracking Number</p>
               <p className="text-lg font-bold text-primary mb-3">{trackingNum}</p>
@@ -112,14 +115,13 @@ const NewOrderPage = () => {
                   className="flex-1 py-2 rounded-lg border border-border text-foreground text-xs font-medium flex items-center justify-center gap-1.5">
                   <Copy className="w-3.5 h-3.5" /> Copy
                 </button>
-                <button onClick={() => toast.info("Print label feature coming soon")}
+                <button onClick={() => navigate(`/print-label/${trackingNum}`)}
                   className="flex-1 py-2 rounded-lg border border-border text-foreground text-xs font-medium flex items-center justify-center gap-1.5">
                   <Printer className="w-3.5 h-3.5" /> Print Label
                 </button>
               </div>
             </div>
 
-            {/* Pickup Details */}
             <div className="bg-accent/30 rounded-xl p-4">
               <p className="text-2xl mb-2 text-center">📦</p>
               <p className="text-sm font-semibold text-foreground text-center">Courier will come to pick up within 2 days</p>

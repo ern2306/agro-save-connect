@@ -22,6 +22,7 @@ import MessagesPage from "@/pages/MessagesPage";
 import ChatPage from "@/pages/ChatPage";
 import DonateSurplusPage from "@/pages/DonateSurplusPage";
 import CommunityMapPage from "@/pages/CommunityMapPage";
+import PrintLabelPage from "@/pages/PrintLabelPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/chat/:id" element={<ChatPage />} />
               <Route path="/donate-surplus/:id" element={<DonateSurplusPage />} />
               <Route path="/community-map" element={<CommunityMapPage />} />
+              <Route path="/print-label/:tracking" element={<PrintLabelPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />
