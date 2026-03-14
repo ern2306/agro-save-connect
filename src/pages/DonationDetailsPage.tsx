@@ -5,7 +5,6 @@ import {
   Truck,
   Package,
   Calendar,
-  User,
   ArrowLeft,
   Printer,
   CheckCircle2,
@@ -15,7 +14,6 @@ import PageHeader from "@/components/PageHeader";
 import { format } from "date-fns";
 
 const DonationDetailsPage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const donationData = location.state;
@@ -56,7 +54,7 @@ const DonationDetailsPage = () => {
             Donation Successful
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Thank you for donating{" "}
+            You have donated{" "}
             <span className="font-bold text-foreground">{kg} kg</span> of {crop}
           </p>
         </div>
