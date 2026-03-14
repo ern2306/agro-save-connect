@@ -1,10 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import BottomNav from "@/components/BottomNav";
-
 import SplashPage from "@/pages/SplashPage";
 import ExplorePage from "@/pages/ExplorePage";
 import PestDetectPage from "@/pages/PestDetectPage";
@@ -22,9 +21,9 @@ import EditListingPage from "@/pages/EditListingPage";
 import MessagesPage from "@/pages/MessagesPage";
 import ChatPage from "@/pages/ChatPage";
 import DonateSurplusPage from "@/pages/DonateSurplusPage";
-import DonationDetailsPage from "@/pages/DonationDetailsPage";
 import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
+import DonationDetailsPage from "@/pages/DonationDetailsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +31,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <Sonner />
       <AppProvider>
         <BrowserRouter>
           <div className="max-w-md mx-auto min-h-screen bg-background relative">
@@ -56,13 +56,10 @@ const App = () => (
                 path="/donate-surplus/:id"
                 element={<DonateSurplusPage />}
               />
-
-              {/*  Donation details route */}
               <Route
                 path="/donation-details/:id"
                 element={<DonationDetailsPage />}
               />
-
               <Route path="/community-map" element={<CommunityMapPage />} />
               <Route
                 path="/print-label/:tracking"
