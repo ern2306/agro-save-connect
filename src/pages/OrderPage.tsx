@@ -19,7 +19,6 @@ const OrderPage = () => {
   const { listings, setListings, currentUser, walletBalance, setWalletBalance, orders, setOrders, notifications, setNotifications, transactions, setTransactions, chatThreads, setChatThreads } = useApp();
   const listing = listings.find((l) => l.id === id);
   const [qty, setQty] = useState(1);
-  const [chatMessage, setChatMessage] = useState("");
   const [showChatBox, setShowChatBox] = useState(false);
 
   if (!listing) return <div className="p-4">Item not found</div>;
