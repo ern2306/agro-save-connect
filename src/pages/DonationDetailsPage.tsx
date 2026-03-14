@@ -1,66 +1,33 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { Heart, ArrowLeft } from "lucide-react";
-import { useApp } from "@/context/AppContext";
-import PageHeader from "@/components/PageHeader";
-import { formatDistanceToNow } from "date-fns";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import NotificationsPage from "./pages/NotificationsPage";
+import DonationDetailsPage from "./pages/DonationDetailsPage";
+import HomePage from "./pages/HomePage";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
+import NewOrderPage from "./pages/NewOrderPage";
+import RefundPage from "./pages/RefundPage";
 
-const DonationDetailsPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { notifications } = useApp();
-
-  const donation = notifications.find(
-    (n) => n.id === id && n.type === "donation"
-  );
-
-  if (!donation) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Donation not found</p>
-      </div>
-    );
-  }
-
+function App() {
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Donation Details" />
+    <Router>
+      <Routes>
 
-      <div className="px-4 py-4">
-        <div className="bg-card border border-border rounded-xl p-4 space-y-4">
+        {/* Home */}
+        <Route path="/" element={<HomePage />} />
 
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center">
-              <Heart className="w-6 h-6 text-primary" />
-            </div>
+        {/* Notifications */}
+        <Route path="/notifications" element={<NotificationsPage />} />
 
-            <div>
-              <h2 className="font-semibold text-lg text-foreground">
-                {donation.title}
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                {formatDistanceToNow(donation.timestamp, { addSuffix: true })}
-              </p>
-            </div>
-          </div>
+        {/* Donation Details */}
+        <Route path="/donation-details/:id" element={<DonationDetailsPage />} />
 
-          <div className="border-t border-border pt-3">
-            <p className="text-sm text-foreground leading-relaxed">
-              {donation.message}
-            </p>
-          </div>
+        {/* Other pages */}
+        <Route path="/order-details/:id" element={<OrderDetailsPage />} />
+        <Route path="/new-order/:id" element={<NewOrderPage />} />
+        <Route path="/refund/:id" element={<RefundPage />} />
 
-        </div>
-
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-6 flex items-center gap-2 text-sm text-primary"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Notifications
-        </button>
-      </div>
-    </div>
+      </Routes>
+    </Router>
   );
-};
+}
 
-export default DonationDetailsPage;
+export default App;
