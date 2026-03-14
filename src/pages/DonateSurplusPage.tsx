@@ -59,18 +59,18 @@ const DonateSurplusPage = () => {
   };
 
 const handleSelectMethod = (method: "pickup" | "dropoff") => {
-  if (!selectedOrg) return;
 
   const donationId = `n${Date.now()}`;
   const donationDate = new Date().toLocaleString();
 
   if (method === "dropoff") {
+
     setNotifications([
       {
         id: donationId,
-        type: "donation" as const,
+        type: "donation",
         title: "Donation Confirmed",
-        message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg.name}.`,
+        message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg?.name}.`,
         orderId: "",
         timestamp: new Date(),
         read: false,
@@ -84,24 +84,25 @@ const handleSelectMethod = (method: "pickup" | "dropoff") => {
       state: {
         crop: listing.name,
         kg: donatedAmount,
-        org: selectedOrg.name,
+        org: selectedOrg?.name,
         method: "Drop-off",
         address: donationAddress,
         date: donationDate,
-        status: "Awaiting Drop-off",
-      },
+        status: "Awaiting Drop-off"
+      }
     });
 
   } else {
+
     const trk = generateTrackingNumber();
     setTrackingNumber(trk);
 
     setNotifications([
       {
         id: donationId,
-        type: "donation" as const,
+        type: "donation",
         title: "Donation Confirmed",
-        message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg.name}.`,
+        message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg?.name}.`,
         orderId: "",
         timestamp: new Date(),
         read: false,
@@ -115,13 +116,14 @@ const handleSelectMethod = (method: "pickup" | "dropoff") => {
       state: {
         crop: listing.name,
         kg: donatedAmount,
-        org: selectedOrg.name,
+        org: selectedOrg?.name,
         method: "Pickup",
         tracking: trk,
         date: donationDate,
-        status: "Courier Scheduled",
-      },
+        status: "Courier Scheduled"
+      }
     });
+
   }
 };
   const openGoogleMaps = (lat?: number, lng?: number) => {
