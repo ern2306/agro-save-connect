@@ -4,6 +4,7 @@ import { Package, CheckCircle, XCircle, ShoppingBag, Truck, Heart } from "lucide
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 const NotificationsPage = () => {
   const { notifications, orders, currentUser } = useApp();
