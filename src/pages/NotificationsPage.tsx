@@ -14,15 +14,15 @@ const NotificationsPage = () => {
     ["order_shipped", "order_confirmed", "order_cancelled", "donation"].includes(n.type)
   );
   
-  // Feature 3: Seller Updates should only show orders from OTHER buyers (not John buying his own listings)
+  // Seller Updates: only show notifications for orders where the item belongs to user's listings
+  const userListingIds = listings.map((l) => l.id);
   const sellerNotifs = notifications.filter((n) => {
     if (!["new_order", "order_cancelled_seller", "order_preparing"].includes(n.type)) {
       return false;
     }
-    // Find the order to check if the buyer is someone else
     const order = orders.find((o) => o.id === n.orderId);
-    // Only include if the order exists AND the buyer is NOT the current user (John)
-    return order && order.buyerId !== currentUser.id;
+    // Only include if order exists, buyer is NOT current user, AND listing is in user's active listings
+    return order && order.buyerId !== currentUser.id && userListingIds.includes(order.listing.id);
   });
 
   const current = tab === "buyer" ? buyerNotifs : sellerNotifs;

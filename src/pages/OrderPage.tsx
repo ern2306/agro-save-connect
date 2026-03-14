@@ -40,7 +40,21 @@ const OrderPage = () => {
       toast.info("This is your own listing");
       return;
     }
-    setShowChatBox(true);
+    // Navigate directly to the chat thread for this seller
+    const existing = chatThreads.find((t) => t.participantId === listing.sellerId);
+    if (existing) {
+      navigate(`/chat/${existing.id}`);
+    } else {
+      const newThread = {
+        id: `c${Date.now()}`,
+        participantId: listing.sellerId,
+        participantName: listing.seller,
+        participantAvatar: "👨‍🌾",
+        messages: [],
+      };
+      setChatThreads([newThread, ...chatThreads]);
+      navigate(`/chat/${newThread.id}`);
+    }
   };
 
   const handleSendChat = () => {
