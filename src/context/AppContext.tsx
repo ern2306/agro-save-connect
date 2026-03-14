@@ -76,16 +76,6 @@ export interface Notification {
   orderId: string;
   timestamp: Date;
   read: boolean;
-  // Donation-specific fields
-  donationData?: {
-    crop: string;
-    kg: number;
-    org: string;
-    method: "pickup" | "dropoff";
-    tracking?: string;
-    address?: string;
-    date: string;
-  };
 }
 
 export interface Transaction {
@@ -279,6 +269,7 @@ const defaultListings: Listing[] = [
   },
 ];
 
+// Fix 5: Short notification messages - "click to see details"
 const defaultNotifications: Notification[] = [
   {
     id: "n1",
@@ -396,6 +387,18 @@ const defaultChatThreads: ChatThread[] = [
 ];
 
 const defaultScanHistory: ScanRecord[] = [
+  {
+    id: "scan3",
+    plantName: "Broccoli",
+    result: "Healthy",
+    timestamp: new Date(Date.now() - 43200000),
+  },
+  {
+    id: "scan4",
+    plantName: "Cabbage",
+    result: "Healthy",
+    timestamp: new Date(Date.now() - 64800000),
+  },
   {
     id: "scan1",
     plantName: "Chili Plant",

@@ -9,10 +9,14 @@ import {
   Heart,
   MapPin,
   Barcode,
+  Bell,
+  ChevronRight,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
+
+const ALLOWED_SELLER_CROPS = ["cabbage", "kangkung", "broccoli"];
 
 const NotificationsPage = () => {
   const { notifications, orders, currentUser, listings } = useApp();
@@ -28,8 +32,9 @@ const NotificationsPage = () => {
     ].includes(n.type)
   );
 
-  const userListingIds = listings.map((l) => l.id);
+  // STRICT seller updates: only Cabbage, Kangkung, Broccoli — NO Potato
   const sellerNotifs = notifications.filter((n) => {
+    // 1. Only show seller-related notification types
     if (
       !["new_order", "order_cancelled_seller", "order_preparing"].includes(
         n.type
@@ -37,44 +42,76 @@ const NotificationsPage = () => {
     ) {
       return false;
     }
+
+    // 2. Find the associated order
     const order = orders.find((o) => o.id === n.orderId);
-    // Fix: Don't show "new_order" notifications if the current user is the buyer (they're buying from someone else)
-    // Only show if: order exists, buyer is NOT the current user, AND the listing belongs to the current user
-    return (
-      order &&
-      order.buyerId !== currentUser.id &&
-      userListingIds.includes(order.listing.id)
-    );
+
+    // 3. Security: Don't show John his own purchases in the Seller tab
+    if (!order || order.buyerId === currentUser.id) return false;
+
+    // 4. THE POTATO FILTER: Only allow Cabbage, Kangkung, Broccoli
+    const cropName = order.listing.name.toLowerCase();
+    return ALLOWED_SELLER_CROPS.some((crop) => cropName.includes(crop));
   });
 
   const current = tab === "buyer" ? buyerNotifs : sellerNotifs;
 
-  const getIcon = (type: string) => {
+  const getIconConfig = (type: string) => {
     switch (type) {
       case "order_shipped":
-        return <Package className="w-5 h-5 text-info" />;
+        return {
+          icon: Truck,
+          bg: "bg-blue-50 dark:bg-blue-950/30",
+          color: "text-blue-600 dark:text-blue-400",
+          label: "Shipped",
+        };
       case "order_confirmed":
-        return <CheckCircle className="w-5 h-5 text-success" />;
+        return {
+          icon: CheckCircle,
+          bg: "bg-emerald-50 dark:bg-emerald-950/30",
+          color: "text-emerald-600 dark:text-emerald-400",
+          label: "Confirmed",
+        };
       case "order_cancelled":
       case "order_cancelled_seller":
-        return <XCircle className="w-5 h-5 text-destructive" />;
+        return {
+          icon: XCircle,
+          bg: "bg-red-50 dark:bg-red-950/30",
+          color: "text-red-500 dark:text-red-400",
+          label: "Cancelled",
+        };
       case "new_order":
-        return <ShoppingBag className="w-5 h-5 text-primary" />;
+        return {
+          icon: ShoppingBag,
+          bg: "bg-primary/10",
+          color: "text-primary",
+          label: "New Order",
+        };
       case "order_preparing":
-        return <Truck className="w-5 h-5 text-primary" />;
+        return {
+          icon: Package,
+          bg: "bg-amber-50 dark:bg-amber-950/30",
+          color: "text-amber-600 dark:text-amber-400",
+          label: "Preparing",
+        };
       case "donation":
-        return <Heart className="w-5 h-5 text-success" />;
+        return {
+          icon: Heart,
+          bg: "bg-rose-50 dark:bg-rose-950/30",
+          color: "text-rose-500 dark:text-rose-400",
+          label: "Donation",
+        };
       default:
-        return <Package className="w-5 h-5 text-muted-foreground" />;
+        return {
+          icon: Bell,
+          bg: "bg-muted",
+          color: "text-muted-foreground",
+          label: "Update",
+        };
     }
   };
 
   const handleClick = (n: (typeof notifications)[0]) => {
-    if (n.type === "donation") {
-      // Navigate to donation details page with donation data
-      navigate(`/donation-details/${n.id}`, { state: n.donationData });
-      return;
-    }
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
     else if (n.type === "order_cancelled_seller")
       navigate(`/refund/${n.orderId}`);
@@ -83,142 +120,105 @@ const NotificationsPage = () => {
     else navigate(`/order-details/${n.orderId}?from=notification`);
   };
 
-  // Enhanced donation notification card
-  const DonationNotificationCard = ({
-    n,
-  }: {
-    n: (typeof notifications)[0];
-  }) => {
-    const data = n.donationData;
-    if (!data) return null;
-
-    return (
-      <button
-        onClick={() => handleClick(n)}
-        className="w-full bg-gradient-to-br from-success/5 to-success/10 rounded-xl p-4 border border-success/30 text-left hover:border-success/60 transition-all hover:shadow-md"
-      >
-        <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-            <Heart className="w-6 h-6 text-success" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm text-foreground">{n.title}</h3>
-
-            {/* Donation details grid */}
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="bg-white/50 dark:bg-black/20 rounded-lg p-2">
-                <p className="text-xs text-muted-foreground">Crop</p>
-                <p className="font-semibold text-sm text-foreground">
-                  {data.crop}
-                </p>
-              </div>
-              <div className="bg-white/50 dark:bg-black/20 rounded-lg p-2">
-                <p className="text-xs text-muted-foreground">Amount</p>
-                <p className="font-semibold text-sm text-foreground">
-                  {data.kg} kg
-                </p>
-              </div>
-              <div className="bg-white/50 dark:bg-black/20 rounded-lg p-2 col-span-2">
-                <p className="text-xs text-muted-foreground">Organization</p>
-                <p className="font-semibold text-sm text-foreground truncate">
-                  {data.org}
-                </p>
-              </div>
-            </div>
-
-            {/* Delivery method info */}
-            <div className="mt-3 flex items-center gap-2">
-              {data.method === "dropoff" ? (
-                <>
-                  <MapPin className="w-4 h-4 text-success" />
-                  <span className="text-xs text-muted-foreground">
-                    Drop-off
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Barcode className="w-4 h-4 text-success" />
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {data.tracking}
-                  </span>
-                </>
-              )}
-            </div>
-
-            <p className="text-xs text-muted-foreground mt-2">
-              {formatDistanceToNow(n.timestamp, { addSuffix: true })}
-            </p>
-          </div>
-        </div>
-      </button>
-    );
-  };
-
-  // Regular notification card
-  const RegularNotificationCard = ({ n }: { n: (typeof notifications)[0] }) => {
-    return (
-      <button
-        onClick={() => handleClick(n)}
-        className="w-full bg-card rounded-xl p-3 flex items-start gap-3 border border-border text-left hover:border-primary/50 transition-colors"
-      >
-        <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center shrink-0">
-          {getIcon(n.type)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-sm text-foreground">{n.title}</h3>
-          <p className="text-xs text-muted-foreground line-clamp-3">
-            {n.message}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {formatDistanceToNow(n.timestamp, { addSuffix: true })}
-          </p>
-        </div>
-      </button>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-background pb-20">
       <PageHeader title="Notifications" />
 
-      <div className="flex border-b border-border">
+      {/* Tab bar */}
+      <div className="flex border-b border-border bg-card">
         <button
           onClick={() => setTab("buyer")}
-          className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${
-            tab === "buyer"
-              ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground"
+          className={`flex-1 py-3.5 text-sm font-semibold text-center transition-colors relative ${
+            tab === "buyer" ? "text-primary" : "text-muted-foreground"
           }`}
         >
           My Notifications
+          {tab === "buyer" && (
+            <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+          )}
         </button>
         <button
           onClick={() => setTab("seller")}
-          className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${
-            tab === "seller"
-              ? "text-primary border-b-2 border-primary"
-              : "text-muted-foreground"
+          className={`flex-1 py-3.5 text-sm font-semibold text-center transition-colors relative ${
+            tab === "seller" ? "text-primary" : "text-muted-foreground"
           }`}
         >
           Seller Updates
+          {tab === "seller" && (
+            <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+          )}
         </button>
       </div>
 
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-4 py-4 space-y-2">
         {current.length === 0 && (
-          <p className="text-center text-muted-foreground py-10 text-sm">
-            No notifications
-          </p>
-        )}
-        {current.map((n) => (
-          <div key={n.id}>
-            {n.type === "donation" ? (
-              <DonationNotificationCard n={n} />
-            ) : (
-              <RegularNotificationCard n={n} />
-            )}
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-3">
+              <Bell className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              No notifications
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {tab === "seller"
+                ? "Seller updates for Cabbage, Kangkung & Broccoli will appear here."
+                : "You're all caught up!"}
+            </p>
           </div>
-        ))}
+        )}
+
+        {current.map((n) => {
+          const cfg = getIconConfig(n.type);
+          const IconComponent = cfg.icon;
+          return (
+            <button
+              key={n.id}
+              onClick={() => handleClick(n)}
+              className="w-full bg-card rounded-xl border border-border text-left active:scale-[0.99] transition-transform shadow-sm overflow-hidden"
+            >
+              <div className="p-4 flex items-start gap-3">
+                {/* Icon */}
+                <div
+                  className={`w-10 h-10 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0`}
+                >
+                  <IconComponent className={`w-5 h-5 ${cfg.color}`} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-semibold text-sm text-foreground leading-tight">
+                          {n.title}
+                        </h3>
+                        {!n.read && (
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {n.message}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                  </div>
+
+                  {/* Footer row */}
+                  <div className="flex items-center justify-between mt-2">
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}
+                    >
+                      {cfg.label}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatDistanceToNow(n.timestamp, { addSuffix: true })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
