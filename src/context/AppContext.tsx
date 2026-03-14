@@ -16,7 +16,7 @@ export interface Listing {
   stock: number;
   image: string;
   seller: string;
-  sellerI: string;
+  sellerId: string;
   isSurplus?: boolean;
   source?: FoodSource;
   freshness?: FreshnessLevel;
@@ -76,6 +76,16 @@ export interface Notification {
   orderId: string;
   timestamp: Date;
   read: boolean;
+  // Donation-specific fields
+  donationData?: {
+    crop: string;
+    kg: number;
+    org: string;
+    method: "pickup" | "dropoff";
+    tracking?: string;
+    address?: string;
+    date: string;
+  };
 }
 
 export interface Transaction {
@@ -269,7 +279,6 @@ const defaultListings: Listing[] = [
   },
 ];
 
-// Fix 5: Short notification messages - "click to see details"
 const defaultNotifications: Notification[] = [
   {
     id: "n1",
