@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft, Copy, Search, Printer, User } from "lucide-react";
+import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft, Copy, Printer, User } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { format } from "date-fns";
@@ -97,10 +97,6 @@ const OrderDetailsPage = () => {
                   <button onClick={() => { navigator.clipboard.writeText(order.trackingNumber!); toast.success("Copied!"); }}
                     className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
                     <Copy className="w-3 h-3" /> Copy
-                  </button>
-                  <button onClick={() => toast.info("Tracking feature coming soon")}
-                    className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
-                    <Search className="w-3 h-3" /> Track Package
                   </button>
                   <button onClick={() => navigate(`/print-label/${order.trackingNumber}`)}
                     className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">

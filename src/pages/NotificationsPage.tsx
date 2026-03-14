@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Package, CheckCircle, XCircle, ShoppingBag, Truck, Heart } from "lucide-react";
+import { Package, CheckCircle2, XCircle, ShoppingBag, Truck, Heart, Bell, ChevronRight } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
+
+const ALLOWED_SELLER_CROPS = ["cabbage", "kangkung", "broccoli"];
 
 const NotificationsPage = () => {
   const { notifications, orders, currentUser } = useApp();
@@ -13,35 +15,42 @@ const NotificationsPage = () => {
   const buyerNotifs = notifications.filter((n) =>
     ["order_shipped", "order_confirmed", "order_cancelled", "donation"].includes(n.type)
   );
-  
-  // Feature 3: Seller Updates should only show orders from OTHER buyers (not John buying his own listings)
+
+  // STRICT seller updates: only Cabbage, Kangkung, Broccoli — NO Potato
   const sellerNotifs = notifications.filter((n) => {
     if (!["new_order", "order_cancelled_seller", "order_preparing"].includes(n.type)) {
       return false;
     }
-    // Find the order to check if the buyer is someone else
     const order = orders.find((o) => o.id === n.orderId);
-    // Only include if the order exists AND the buyer is NOT the current user (John)
-    return order && order.buyerId !== currentUser.id;
+    if (!order || order.buyerId === currentUser.id) return false;
+    // Hard-coded filter: only allow Cabbage, Kangkung, Broccoli
+    const cropName = order.listing.name.toLowerCase();
+    return ALLOWED_SELLER_CROPS.some((crop) => cropName.includes(crop));
   });
 
   const current = tab === "buyer" ? buyerNotifs : sellerNotifs;
 
-  const getIcon = (type: string) => {
+  const getIconConfig = (type: string) => {
     switch (type) {
-      case "order_shipped": return <Package className="w-5 h-5 text-info" />;
-      case "order_confirmed": return <CheckCircle className="w-5 h-5 text-success" />;
+      case "order_shipped":
+        return { icon: Truck, bg: "bg-blue-50 dark:bg-blue-950/30", color: "text-blue-600 dark:text-blue-400", label: "Shipped" };
+      case "order_confirmed":
+        return { icon: CheckCircle2, bg: "bg-emerald-50 dark:bg-emerald-950/30", color: "text-emerald-600 dark:text-emerald-400", label: "Confirmed" };
       case "order_cancelled":
-      case "order_cancelled_seller": return <XCircle className="w-5 h-5 text-destructive" />;
-      case "new_order": return <ShoppingBag className="w-5 h-5 text-primary" />;
-      case "order_preparing": return <Truck className="w-5 h-5 text-primary" />;
-      case "donation": return <Heart className="w-5 h-5 text-primary" />;
-      default: return <Package className="w-5 h-5 text-muted-foreground" />;
+      case "order_cancelled_seller":
+        return { icon: XCircle, bg: "bg-red-50 dark:bg-red-950/30", color: "text-red-500 dark:text-red-400", label: "Cancelled" };
+      case "new_order":
+        return { icon: ShoppingBag, bg: "bg-primary/10", color: "text-primary", label: "New Order" };
+      case "order_preparing":
+        return { icon: Package, bg: "bg-amber-50 dark:bg-amber-950/30", color: "text-amber-600 dark:text-amber-400", label: "Preparing" };
+      case "donation":
+        return { icon: Heart, bg: "bg-rose-50 dark:bg-rose-950/30", color: "text-rose-500 dark:text-rose-400", label: "Donation" };
+      default:
+        return { icon: Bell, bg: "bg-muted", color: "text-muted-foreground", label: "Update" };
     }
   };
 
   const handleClick = (n: typeof notifications[0]) => {
-    // Fix 3: donation confirmed now navigates to order details
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
     else if (n.type === "order_cancelled_seller") navigate(`/refund/${n.orderId}`);
     else if (n.type === "order_preparing") navigate(`/order-details/${n.orderId}?from=seller`);
@@ -52,47 +61,89 @@ const NotificationsPage = () => {
     <div className="min-h-screen bg-background pb-20">
       <PageHeader title="Notifications" />
 
-      <div className="flex border-b border-border">
+      {/* Tab bar */}
+      <div className="flex border-b border-border bg-card">
         <button
           onClick={() => setTab("buyer")}
-          className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${
-            tab === "buyer" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"
+          className={`flex-1 py-3.5 text-sm font-semibold text-center transition-colors relative ${
+            tab === "buyer" ? "text-primary" : "text-muted-foreground"
           }`}
         >
           My Notifications
+          {tab === "buyer" && (
+            <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+          )}
         </button>
         <button
           onClick={() => setTab("seller")}
-          className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${
-            tab === "seller" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"
+          className={`flex-1 py-3.5 text-sm font-semibold text-center transition-colors relative ${
+            tab === "seller" ? "text-primary" : "text-muted-foreground"
           }`}
         >
           Seller Updates
+          {tab === "seller" && (
+            <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+          )}
         </button>
       </div>
 
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-4 py-4 space-y-2">
         {current.length === 0 && (
-          <p className="text-center text-muted-foreground py-10 text-sm">No notifications</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-3">
+              <Bell className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">No notifications</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {tab === "seller" ? "Seller updates for Cabbage, Kangkung & Broccoli will appear here." : "You're all caught up!"}
+            </p>
+          </div>
         )}
-        {current.map((n) => (
-          <button
-            key={n.id}
-            onClick={() => handleClick(n)}
-            className="w-full bg-card rounded-xl p-3 flex items-start gap-3 border border-border text-left"
-          >
-            <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center shrink-0">
-              {getIcon(n.type)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm text-foreground">{n.title}</h3>
-              <p className="text-xs text-muted-foreground line-clamp-3">{n.message}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {formatDistanceToNow(n.timestamp, { addSuffix: true })}
-              </p>
-            </div>
-          </button>
-        ))}
+
+        {current.map((n) => {
+          const cfg = getIconConfig(n.type);
+          const IconComponent = cfg.icon;
+          return (
+            <button
+              key={n.id}
+              onClick={() => handleClick(n)}
+              className="w-full bg-card rounded-xl border border-border text-left active:scale-[0.99] transition-transform shadow-sm overflow-hidden"
+            >
+              <div className="p-4 flex items-start gap-3">
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0`}>
+                  <IconComponent className={`w-5 h-5 ${cfg.color}`} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-semibold text-sm text-foreground leading-tight">{n.title}</h3>
+                        {!n.read && (
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                  </div>
+
+                  {/* Footer row */}
+                  <div className="flex items-center justify-between mt-2">
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}>
+                      {cfg.label}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatDistanceToNow(n.timestamp, { addSuffix: true })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

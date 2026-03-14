@@ -200,6 +200,14 @@ const defaultChatThreads: ChatThread[] = [
 
 const defaultScanHistory: ScanRecord[] = [
   {
+    id: "scan3", plantName: "Broccoli", result: "Healthy",
+    timestamp: new Date(Date.now() - 43200000),
+  },
+  {
+    id: "scan4", plantName: "Cabbage", result: "Healthy",
+    timestamp: new Date(Date.now() - 64800000),
+  },
+  {
     id: "scan1", plantName: "Chili Plant", result: "Pest Detected",
     timestamp: new Date(Date.now() - 86400000),
     treatment: {
