@@ -269,7 +269,6 @@ const defaultListings: Listing[] = [
   },
 ];
 
-// Fix 5: Short notification messages - "click to see details"
 const defaultNotifications: Notification[] = [
   {
     id: "n1",
@@ -293,9 +292,9 @@ const defaultNotifications: Notification[] = [
     id: "n3",
     type: "new_order",
     title: "New Order",
-    message: "You received a new order for Potato. Click to see details.",
-    orderId: "o3",
-    timestamp: new Date(Date.now() - 1800000),
+    message: "You received a new order for Cabbage. Click to see details.",
+    orderId: "o4",
+    timestamp: new Date(Date.now() - 600000),
     read: false,
   },
 ];
@@ -340,6 +339,19 @@ const defaultOrders: Order[] = [
     address: "123 Farm aroad, Kuala Lumpur",
     buyerName: "John Farmer",
     buyerPhone: "+60123456789",
+  },
+  {
+    id: "o4",
+    listing: defaultListings[6],
+    quantity: 2,
+    totalPrice: 6.0,
+    status: "pending",
+    buyerId: "buyer2",
+    sellerId: "user1",
+    createdAt: new Date(Date.now() - 600000),
+    address: "456 City Road, Kuala Lumpur",
+    buyerName: "Sarah Lim",
+    buyerPhone: "+60198765432",
   },
 ];
 
