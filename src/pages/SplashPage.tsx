@@ -7,7 +7,7 @@ const SplashPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => navigate("/explore", { replace: true }), 2500);
+    const timer = setTimeout(() => navigate("/login", { replace: true }), 2500);
     return () => clearTimeout(timer);
   }, [navigate]);
 

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
@@ -24,51 +24,54 @@ import DonateSurplusPage from "@/pages/DonateSurplusPage";
 import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
 import DonationDetailsPage from "@/pages/DonationDetailsPage";
+import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = () => {
+  const location = useLocation();
+  const hideNavPaths = ["/", "/login"];
+  const shouldShowNav = !hideNavPaths.includes(location.pathname);
+
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-background relative shadow-2xl border-x border-border/50">
+      <Routes>
+        <Route path="/" element={<SplashPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/pest-detect" element={<PestDetectPage />} />
+        <Route path="/add-listing" element={<AddListingPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/me" element={<MePage />} />
+        <Route path="/order/:id" element={<OrderPage />} />
+        <Route path="/order-details/:id" element={<OrderDetailsPage />} />
+        <Route path="/new-order/:id" element={<NewOrderPage />} />
+        <Route path="/refund/:id" element={<RefundPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/my-listings" element={<MyListingsPage />} />
+        <Route path="/edit-listing/:id" element={<EditListingPage />} />
+        <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/chat/:id" element={<ChatPage />} />
+        <Route path="/donate-surplus/:id" element={<DonateSurplusPage />} />
+        <Route path="/donation-details/:id" element={<DonationDetailsPage />} />
+        <Route path="/community-map" element={<CommunityMapPage />} />
+        <Route path="/print-label/:tracking" element={<PrintLabelPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      {shouldShowNav && <BottomNav />}
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Sonner />
+      <Sonner position="top-center" />
       <AppProvider>
         <BrowserRouter>
-          <div className="max-w-md mx-auto min-h-screen bg-background relative">
-            <Routes>
-              <Route path="/" element={<SplashPage />} />
-              <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/pest-detect" element={<PestDetectPage />} />
-              <Route path="/add-listing" element={<AddListingPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/me" element={<MePage />} />
-              <Route path="/order/:id" element={<OrderPage />} />
-              <Route path="/order-details/:id" element={<OrderDetailsPage />} />
-              <Route path="/new-order/:id" element={<NewOrderPage />} />
-              <Route path="/refund/:id" element={<RefundPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/wallet" element={<WalletPage />} />
-              <Route path="/my-listings" element={<MyListingsPage />} />
-              <Route path="/edit-listing/:id" element={<EditListingPage />} />
-              <Route path="/messages" element={<MessagesPage />} />
-              <Route path="/chat/:id" element={<ChatPage />} />
-              <Route
-                path="/donate-surplus/:id"
-                element={<DonateSurplusPage />}
-              />
-              <Route
-                path="/donation-details/:id"
-                element={<DonationDetailsPage />}
-              />
-              <Route path="/community-map" element={<CommunityMapPage />} />
-              <Route
-                path="/print-label/:tracking"
-                element={<PrintLabelPage />}
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <BottomNav />
-          </div>
+          <AppRoutes />
         </BrowserRouter>
       </AppProvider>
     </TooltipProvider>
