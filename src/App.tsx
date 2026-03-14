@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import BottomNav from "@/components/BottomNav";
@@ -22,7 +22,7 @@ import EditListingPage from "@/pages/EditListingPage";
 import MessagesPage from "@/pages/MessagesPage";
 import ChatPage from "@/pages/ChatPage";
 import DonateSurplusPage from "@/pages/DonateSurplusPage";
-import DonationDetailsPage from "@/pages/DonationDetailsPage"; 
+import DonationDetailsPage from "@/pages/DonationDetailsPage";
 import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
 import NotFound from "@/pages/NotFound";
@@ -32,7 +32,6 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Sonner />
       <AppProvider>
         <BrowserRouter>
           <div className="max-w-md mx-auto min-h-screen bg-background relative">
@@ -53,13 +52,22 @@ const App = () => (
               <Route path="/edit-listing/:id" element={<EditListingPage />} />
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/chat/:id" element={<ChatPage />} />
-              <Route path="/donate-surplus/:id" element={<DonateSurplusPage />} />
-              
+              <Route
+                path="/donate-surplus/:id"
+                element={<DonateSurplusPage />}
+              />
+
               {/*  Donation details route */}
-              <Route path="/donation-details/:id" element={<DonationDetailsPage />} />
+              <Route
+                path="/donation-details/:id"
+                element={<DonationDetailsPage />}
+              />
 
               <Route path="/community-map" element={<CommunityMapPage />} />
-              <Route path="/print-label/:tracking" element={<PrintLabelPage />} />
+              <Route
+                path="/print-label/:tracking"
+                element={<PrintLabelPage />}
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />
