@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
 const NotificationsPage = () => {
-  const { notifications, orders, currentUser } = useApp();
+  const { notifications, orders, currentUser, listings } = useApp();
   const [tab, setTab] = useState<"buyer" | "seller">("buyer");
   const navigate = useNavigate();
 
