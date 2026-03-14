@@ -58,36 +58,74 @@ const DonateSurplusPage = () => {
     setStep("confirmed");
   };
 
-  const handleSelectMethod = (method: "pickup" | "dropoff") => {
-    if (method === "dropoff") {
-      // Add notification with drop-off info
-      setNotifications([
-        {
-          id: `n${Date.now()}`, type: "donation" as const, title: "Donation Confirmed",
-          message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg?.name}. Drop-off location: ${donationAddress}. Please drop off within 2 days.`,
-          orderId: "", timestamp: new Date(), read: false,
-        },
-        ...notifications,
-      ]);
-      toast.success("Thank you for donating surplus crops!");
-      setStep("dropoff");
-    } else {
-      const trk = generateTrackingNumber();
-      setTrackingNumber(trk);
-      // Add notification with tracking number
-      setNotifications([
-        {
-          id: `n${Date.now()}`, type: "donation" as const, title: "Donation Confirmed",
-          message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg?.name}. Tracking Number: ${trk}. Courier will pick up within 2 days.`,
-          orderId: "", timestamp: new Date(), read: false,
-        },
-        ...notifications,
-      ]);
-      toast.success("Thank you for donating surplus crops!");
-      setStep("pickup");
-    }
-  };
+const handleSelectMethod = (method: "pickup" | "dropoff") => {
 
+  const donationId = `n${Date.now()}`;
+  const donationDate = new Date().toLocaleString();
+
+  if (method === "dropoff") {
+
+    setNotifications([
+      {
+        id: donationId,
+        type: "donation",
+        title: "Donation Confirmed",
+        message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg?.name}.`,
+        orderId: "",
+        timestamp: new Date(),
+        read: false,
+      },
+      ...notifications,
+    ]);
+
+    toast.success("Thank you for donating surplus crops!");
+
+    navigate(`/donation/${donationId}`, {
+      state: {
+        crop: listing.name,
+        kg: donatedAmount,
+        org: selectedOrg?.name,
+        method: "Drop-off",
+        address: donationAddress,
+        date: donationDate,
+        status: "Awaiting Drop-off"
+      }
+    });
+
+  } else {
+
+    const trk = generateTrackingNumber();
+    setTrackingNumber(trk);
+
+    setNotifications([
+      {
+        id: donationId,
+        type: "donation",
+        title: "Donation Confirmed",
+        message: `You donated ${donatedAmount}kg of ${listing.name} to ${selectedOrg?.name}.`,
+        orderId: "",
+        timestamp: new Date(),
+        read: false,
+      },
+      ...notifications,
+    ]);
+
+    toast.success("Thank you for donating surplus crops!");
+
+    navigate(`/donation/${donationId}`, {
+      state: {
+        crop: listing.name,
+        kg: donatedAmount,
+        org: selectedOrg?.name,
+        method: "Pickup",
+        tracking: trk,
+        date: donationDate,
+        status: "Courier Scheduled"
+      }
+    });
+
+  }
+};
   const openGoogleMaps = (lat?: number, lng?: number) => {
     const dest = lat && lng ? `${lat},${lng}` : encodeURIComponent(donationAddress);
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest}`, "_blank");
