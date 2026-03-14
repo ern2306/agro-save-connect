@@ -162,16 +162,8 @@ const OrderPage = () => {
                 </button>
               </div>
             )}
-                      </button>
-                      <button onClick={() => setShowChatBox(false)}
-                        className="py-2 px-3 rounded-lg border border-border text-foreground text-sm font-medium">
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+          </div>
+        </div>
           </div>
         </div>
 
