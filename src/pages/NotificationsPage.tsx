@@ -19,7 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 const ALLOWED_SELLER_CROPS = ["cabbage", "kangkung", "broccoli"];
 
 const NotificationsPage = () => {
-  const { notifications, orders, currentUser, listings } = useApp();
+  const { notifications, orders, currentUser } = useApp();
   const [tab, setTab] = useState<"buyer" | "seller">("buyer");
   const navigate = useNavigate();
 
@@ -34,7 +34,6 @@ const NotificationsPage = () => {
 
   // STRICT seller updates: only Cabbage, Kangkung, Broccoli — NO Potato
   const sellerNotifs = notifications.filter((n) => {
-    // 1. Only show seller-related notification types
     if (
       !["new_order", "order_cancelled_seller", "order_preparing"].includes(
         n.type
@@ -42,14 +41,8 @@ const NotificationsPage = () => {
     ) {
       return false;
     }
-
-    // 2. Find the associated order
     const order = orders.find((o) => o.id === n.orderId);
-
-    // 3. Security: Don't show John his own purchases in the Seller tab
     if (!order || order.buyerId === currentUser.id) return false;
-
-    // 4. THE POTATO FILTER: Only allow Cabbage, Kangkung, Broccoli
     const cropName = order.listing.name.toLowerCase();
     return ALLOWED_SELLER_CROPS.some((crop) => cropName.includes(crop));
   });
@@ -112,6 +105,30 @@ const NotificationsPage = () => {
   };
 
   const handleClick = (n: (typeof notifications)[0]) => {
+    if (n.type === "donation") {
+      // Mock donation data for display if not present in notification object
+      // In a real app, this would come from the notification object or an API
+      const mockDonationData = {
+        id: n.id,
+        crop: n.message.split(" ")[3] || "Crops",
+        kg: n.message.split(" ")[2] || "0",
+        org: n.message.includes("to ")
+          ? n.message.split("to ")[1].split(".")[0]
+          : "Community Org",
+        method: n.message.includes("Tracking") ? "pickup" : "dropoff",
+        tracking: n.message.includes("Tracking Number: ")
+          ? n.message.split("Tracking Number: ")[1].split(".")[0]
+          : null,
+        address: n.message.includes("location: ")
+          ? n.message.split("location: ")[1].split(".")[0]
+          : "12, Jalan Bangsar Utama, 59000 KL",
+        timestamp: n.timestamp,
+      };
+
+      navigate(`/donation-details/${n.id}`, { state: mockDonationData });
+      return;
+    }
+
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
     else if (n.type === "order_cancelled_seller")
       navigate(`/refund/${n.orderId}`);
