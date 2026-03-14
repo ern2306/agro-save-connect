@@ -121,8 +121,8 @@ export const generateTrackingNumber = () => {
 };
 
 interface AppState {
-  currentUser: UserProfile;
-  setCurrentUser: React.Dispatch<React.SetStateAction<UserProfile>>;
+  currentUser: UserProfile | null;
+  setCurrentUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
   walletBalance: number;
   setWalletBalance: React.Dispatch<React.SetStateAction<number>>;
   listings: Listing[];
@@ -499,37 +499,6 @@ const defaultChatThreads: ChatThread[] = [
   },
 ];
 
-const defaultTransactions: Transaction[] = [
-  {
-    id: "t1",
-    type: "topup",
-    amount: 5000.0,
-    description: "Wallet Top-up via FPX",
-    timestamp: new Date(Date.now() - 604800000),
-  },
-  {
-    id: "t2",
-    type: "purchase",
-    amount: -17.5,
-    description: "Payment for Potato order #1001",
-    timestamp: new Date(Date.now() - 86400000),
-  },
-  {
-    id: "t3",
-    type: "purchase",
-    amount: -15.0,
-    description: "Payment for Tomato order #1002",
-    timestamp: new Date(Date.now() - 172800000),
-  },
-  {
-    id: "t4",
-    type: "sale",
-    amount: 592.5,
-    description: "Earnings from Cabbage sale",
-    timestamp: new Date(Date.now() - 43200000),
-  },
-];
-
 const defaultScanHistory: ScanRecord[] = [
   {
     id: "scan3",
@@ -560,13 +529,9 @@ const defaultScanHistory: ScanRecord[] = [
 ];
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile>({
-    id: "user1",
-    username: "John Farmer",
-    phone: "+60123456789",
-    email: "john@agrosave.com",
-    avatar: "👨‍🌾",
-    address: "123 Farm aroad, Kuala Lumpur",
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const savedUser = localStorage.getItem("agro_user");
+    return savedUser ? JSON.parse(savedUser) : null;
   });
   const [walletBalance, setWalletBalance] = useState(5560.0);
   const [listings, setListings] = useState<Listing[]>(defaultListings);
@@ -575,12 +540,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useState<Notification[]>(defaultNotifications);
   const [chatThreads, setChatThreads] =
     useState<ChatThread[]>(defaultChatThreads);
-  const [transactions, setTransactions] =
-    useState<Transaction[]>(defaultTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [scanHistory, setScanHistory] =
     useState<ScanRecord[]>(defaultScanHistory);
   const [language, setLanguage] = useState<Language>("en");
-  const [blockedUserIds, setBlockedUserIds] = useState<string[]>(["seller4"]); // Pre-blocked Farmer Lee for example
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
   );

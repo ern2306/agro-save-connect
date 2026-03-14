@@ -16,7 +16,16 @@ import { Language } from "@/lib/i18n";
 
 const MePage = () => {
   const navigate = useNavigate();
-  const { currentUser, walletBalance, language, setLanguage, t } = useApp();
+  const {
+    currentUser,
+    setCurrentUser,
+    walletBalance,
+    language,
+    setLanguage,
+    t,
+  } = useApp();
+
+  if (!currentUser) return null;
 
   const menuItems = [
     { icon: User, label: t("profile"), path: "/profile" },
@@ -24,7 +33,7 @@ const MePage = () => {
       icon: Wallet,
       label: t("wallet"),
       path: "/wallet",
-      extra: `RM ${walletBalance.toFixed(2)}`,
+      extra: `RM ${walletBalance?.toFixed(2) || "0.00"}`,
     },
     { icon: Package, label: t("my_listings"), path: "/my-listings" },
     { icon: MapPin, label: t("community_map"), path: "/community-map" },
@@ -32,6 +41,7 @@ const MePage = () => {
 
   const settingItems = [
     { icon: Settings, label: t("settings"), path: "/settings" },
+    { icon: HelpCircle, label: t("help_center"), path: "/help" },
     { icon: Info, label: t("about_us"), path: "/about" },
   ];
 
@@ -53,6 +63,13 @@ const MePage = () => {
             <h1 className="text-2xl font-bold text-white">
               {currentUser.username}
             </h1>
+            <p className="text-white/70 text-sm">{currentUser.email}</p>
+            <button
+              onClick={() => navigate("/profile")}
+              className="mt-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors border border-white/10"
+            >
+              {t("edit_profile")}
+            </button>
           </div>
         </div>
       </div>
@@ -153,7 +170,11 @@ const MePage = () => {
 
         {/* Logout */}
         <button
-          onClick={() => navigate("/login")}
+          onClick={() => {
+            localStorage.removeItem("agro_user");
+            setCurrentUser(null);
+            navigate("/login");
+          }}
           className="w-full flex items-center gap-3 p-4 bg-red-500/5 hover:bg-red-500/10 rounded-3xl border border-red-500/10 text-red-500 transition-colors mb-6"
         >
           <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
