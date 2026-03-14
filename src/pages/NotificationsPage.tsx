@@ -4,9 +4,10 @@ import { Package, CheckCircle, XCircle, ShoppingBag, Truck, Heart } from "lucide
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 const NotificationsPage = () => {
-  const { notifications, orders, currentUser } = useApp();
+  const { notifications, orders, currentUser, listings } = useApp();
   const [tab, setTab] = useState<"buyer" | "seller">("buyer");
   const navigate = useNavigate();
 
@@ -14,15 +15,15 @@ const NotificationsPage = () => {
     ["order_shipped", "order_confirmed", "order_cancelled", "donation"].includes(n.type)
   );
   
-  // Feature 3: Seller Updates should only show orders from OTHER buyers (not John buying his own listings)
+  // Seller Updates: only show notifications for orders where the item belongs to user's listings
+  const userListingIds = listings.map((l) => l.id);
   const sellerNotifs = notifications.filter((n) => {
     if (!["new_order", "order_cancelled_seller", "order_preparing"].includes(n.type)) {
       return false;
     }
-    // Find the order to check if the buyer is someone else
     const order = orders.find((o) => o.id === n.orderId);
-    // Only include if the order exists AND the buyer is NOT the current user (John)
-    return order && order.buyerId !== currentUser.id;
+    // Only include if order exists, buyer is NOT current user, AND listing is in user's active listings
+    return order && order.buyerId !== currentUser.id && userListingIds.includes(order.listing.id);
   });
 
   const current = tab === "buyer" ? buyerNotifs : sellerNotifs;
@@ -41,7 +42,11 @@ const NotificationsPage = () => {
   };
 
   const handleClick = (n: typeof notifications[0]) => {
-    // Fix 3: donation confirmed now navigates to order details
+    if (n.type === "donation") {
+      // Donation notifications: show a toast with details since there's no dedicated page
+      toast.info(n.message);
+      return;
+    }
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
     else if (n.type === "order_cancelled_seller") navigate(`/refund/${n.orderId}`);
     else if (n.type === "order_preparing") navigate(`/order-details/${n.orderId}?from=seller`);
