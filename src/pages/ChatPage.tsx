@@ -37,12 +37,12 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col">
+    <div className="h-screen bg-background flex flex-col">
 
       <PageHeader title={thread.participantName} showBack />
 
       {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 pb-32">
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 pb-28">
         {thread.messages.map((msg) => {
           const isMe = msg.senderId === currentUser.id;
 
