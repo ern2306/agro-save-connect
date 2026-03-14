@@ -1,15 +1,37 @@
 import { useState } from "react";
-import { ArrowUpCircle, Send, Wallet, Building2 } from "lucide-react";
+import {
+  ArrowUpCircle,
+  Send,
+  Wallet,
+  Building2,
+  ArrowLeft,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Clock,
+  X,
+  CheckCircle2,
+  ChevronRight,
+} from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import PageHeader from "@/components/PageHeader";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
 const presetAmounts = [10, 20, 50, 100, 200, 500];
-const bankOptions = ["Maybank", "CIMB Bank", "Public Bank", "RHB Bank", "Hong Leong Bank", "AmBank", "Bank Islam"];
+const bankOptions = [
+  "Maybank",
+  "CIMB Bank",
+  "Public Bank",
+  "RHB Bank",
+  "Hong Leong Bank",
+  "AmBank",
+  "Bank Islam",
+];
 
 const WalletPage = () => {
-  const { walletBalance, setWalletBalance, transactions, setTransactions } = useApp();
+  const navigate = useNavigate();
+  const { walletBalance, setWalletBalance, transactions, setTransactions } =
+    useApp();
   const [showTopUp, setShowTopUp] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -21,7 +43,15 @@ const WalletPage = () => {
   const [topUpBank, setTopUpBank] = useState("");
   const [topUpAccount, setTopUpAccount] = useState("");
 
-  const closeAll = () => { setShowTopUp(false); setShowTransfer(false); setShowWithdraw(false); setAmount(""); setSelectedPreset(null); setTopUpBank(""); setTopUpAccount(""); };
+  const closeAll = () => {
+    setShowTopUp(false);
+    setShowTransfer(false);
+    setShowWithdraw(false);
+    setAmount("");
+    setSelectedPreset(null);
+    setTopUpBank("");
+    setTopUpAccount("");
+  };
 
   const handlePresetSelect = (val: number) => {
     setSelectedPreset(val);
@@ -30,12 +60,27 @@ const WalletPage = () => {
 
   const handleTopUp = () => {
     const val = parseFloat(amount);
-    if (!topUpBank) { toast.error("Please select a bank"); return; }
-    if (!topUpAccount.trim()) { toast.error("Please enter account number"); return; }
-    if (!val || val <= 0) { toast.error("Enter valid amount"); return; }
+    if (!topUpBank) {
+      toast.error("Please select a bank");
+      return;
+    }
+    if (!topUpAccount.trim()) {
+      toast.error("Please enter account number");
+      return;
+    }
+    if (!val || val <= 0) {
+      toast.error("Enter valid amount");
+      return;
+    }
     setWalletBalance((b) => b + val);
     setTransactions([
-      { id: `t${Date.now()}`, type: "topup", amount: val, description: "Top Up", timestamp: new Date() },
+      {
+        id: `t${Date.now()}`,
+        type: "topup",
+        amount: val,
+        description: `Top Up via ${topUpBank}`,
+        timestamp: new Date(),
+      },
       ...transactions,
     ]);
     toast.success(`RM ${val.toFixed(2)} topped up!`);
@@ -44,12 +89,27 @@ const WalletPage = () => {
 
   const handleTransfer = () => {
     const val = parseFloat(amount);
-    if (!val || val <= 0) { toast.error("Enter valid amount"); return; }
-    if (!transferTo.trim()) { toast.error("Enter recipient"); return; }
-    if (walletBalance < val) { toast.error("Insufficient balance"); return; }
+    if (!val || val <= 0) {
+      toast.error("Enter valid amount");
+      return;
+    }
+    if (!transferTo.trim()) {
+      toast.error("Enter recipient");
+      return;
+    }
+    if (walletBalance < val) {
+      toast.error("Insufficient balance");
+      return;
+    }
     setWalletBalance((b) => b - val);
     setTransactions([
-      { id: `t${Date.now()}`, type: "transfer", amount: -val, description: `Transfer to ${transferTo}`, timestamp: new Date() },
+      {
+        id: `t${Date.now()}`,
+        type: "transfer",
+        amount: -val,
+        description: `Transfer to ${transferTo}`,
+        timestamp: new Date(),
+      },
       ...transactions,
     ]);
     toast.success(`RM ${val.toFixed(2)} transferred!`);
@@ -59,13 +119,33 @@ const WalletPage = () => {
 
   const handleWithdraw = () => {
     const val = parseFloat(amount);
-    if (!val || val <= 0) { toast.error("Enter valid amount"); return; }
-    if (!withdrawBank) { toast.error("Select a bank"); return; }
-    if (!withdrawAccount.trim()) { toast.error("Enter account number"); return; }
-    if (walletBalance < val) { toast.error("Insufficient balance"); return; }
+    if (!val || val <= 0) {
+      toast.error("Enter valid amount");
+      return;
+    }
+    if (!withdrawBank) {
+      toast.error("Select a bank");
+      return;
+    }
+    if (!withdrawAccount.trim()) {
+      toast.error("Enter account number");
+      return;
+    }
+    if (walletBalance < val) {
+      toast.error("Insufficient balance");
+      return;
+    }
     setWalletBalance((b) => b - val);
     setTransactions([
-      { id: `t${Date.now()}`, type: "transfer", amount: -val, description: `Withdraw to ${withdrawBank} (****${withdrawAccount.slice(-4)})`, timestamp: new Date() },
+      {
+        id: `t${Date.now()}`,
+        type: "transfer",
+        amount: -val,
+        description: `Withdraw to ${withdrawBank} (****${withdrawAccount.slice(
+          -4
+        )})`,
+        timestamp: new Date(),
+      },
       ...transactions,
     ]);
     toast.success(`RM ${val.toFixed(2)} withdrawn to ${withdrawBank}!`);
@@ -76,100 +156,273 @@ const WalletPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <PageHeader title="Wallet" showBack />
-      <div className="px-4 py-6">
-        {/* Balance Card */}
-        <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-6 mb-6">
-          <p className="text-primary-foreground/70 text-sm">Current Balance</p>
-          <h2 className="text-primary-foreground text-3xl font-bold mt-1">RM {walletBalance.toFixed(2)}</h2>
-          <div className="flex gap-2 mt-4">
-            <button onClick={() => { closeAll(); setShowTopUp(true); }}
-              className="flex-1 py-2 rounded-lg bg-primary-foreground/20 text-primary-foreground text-xs font-medium flex items-center justify-center gap-1">
-              <ArrowUpCircle className="w-3.5 h-3.5" /> Top Up
-            </button>
-            <button onClick={() => { closeAll(); setShowTransfer(true); }}
-              className="flex-1 py-2 rounded-lg bg-primary-foreground/20 text-primary-foreground text-xs font-medium flex items-center justify-center gap-1">
-              <Send className="w-3.5 h-3.5" /> Transfer
-            </button>
-            <button onClick={() => { closeAll(); setShowWithdraw(true); }}
-              className="flex-1 py-2 rounded-lg bg-primary-foreground/20 text-primary-foreground text-xs font-medium flex items-center justify-center gap-1">
-              <Building2 className="w-3.5 h-3.5" /> Withdraw
-            </button>
-          </div>
+      {/* Header */}
+      <div className="bg-primary pt-12 pb-24 px-6 relative overflow-hidden rounded-b-[3.5rem] shadow-xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
+        <div className="relative z-10 flex items-center justify-between mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-xl font-black text-white tracking-widest uppercase">
+            My Wallet
+          </h1>
+          <div className="w-10" />
         </div>
 
-        {/* Top Up Panel */}
-        {showTopUp && (
-          <div className="bg-card rounded-xl p-4 border border-border mb-4 animate-slide-up">
-            <h3 className="font-medium text-foreground text-sm mb-3">Top Up Wallet</h3>
-            <select value={topUpBank} onChange={(e) => setTopUpBank(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
-              <option value="">Select Bank / Payment Provider</option>
-              {bankOptions.map((b) => <option key={b} value={b}>{b}</option>)}
-            </select>
-            <input value={topUpAccount} onChange={(e) => setTopUpAccount(e.target.value)} placeholder="Account Number"
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {presetAmounts.map((p) => (
-                <button key={p} onClick={() => handlePresetSelect(p)}
-                  className={`py-2.5 rounded-lg text-sm font-medium border transition-colors ${
-                    selectedPreset === p ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border text-foreground hover:border-primary/50"
-                  }`}>
-                  RM {p}
+        <div className="relative z-10 text-center">
+          <p className="text-white/70 text-xs font-black uppercase tracking-[0.2em] mb-2">
+            Available Balance
+          </p>
+          <h2 className="text-5xl font-black text-white tracking-tight">
+            <span className="text-2xl mr-1">RM</span>
+            {walletBalance.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </h2>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="px-6 -mt-12 relative z-20 mb-8">
+        <div className="bg-card rounded-[2.5rem] p-4 shadow-2xl border border-border/50 grid grid-cols-3 gap-2">
+          <button
+            onClick={() => {
+              closeAll();
+              setShowTopUp(true);
+            }}
+            className="flex flex-col items-center gap-2 py-4 rounded-3xl hover:bg-primary/5 transition-colors group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-active:scale-90 transition-transform">
+              <ArrowUpCircle className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-foreground">
+              Top Up
+            </span>
+          </button>
+          <button
+            onClick={() => {
+              closeAll();
+              setShowTransfer(true);
+            }}
+            className="flex flex-col items-center gap-2 py-4 rounded-3xl hover:bg-blue-500/5 transition-colors group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-active:scale-90 transition-transform">
+              <Send className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-foreground">
+              Transfer
+            </span>
+          </button>
+          <button
+            onClick={() => {
+              closeAll();
+              setShowWithdraw(true);
+            }}
+            className="flex flex-col items-center gap-2 py-4 rounded-3xl hover:bg-emerald-500/5 transition-colors group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-active:scale-90 transition-transform">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-foreground">
+              Withdraw
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="px-6 space-y-6">
+        {/* Transaction Panels (Modals/Inline) */}
+        {(showTopUp || showTransfer || showWithdraw) && (
+          <div className="bg-card rounded-[2.5rem] p-6 border-2 border-primary/20 shadow-xl animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-foreground uppercase tracking-tight">
+                {showTopUp
+                  ? "Top Up Wallet"
+                  : showTransfer
+                  ? "Transfer Money"
+                  : "Withdraw Funds"}
+              </h3>
+              <button
+                onClick={closeAll}
+                className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {showTopUp && (
+              <div className="space-y-4">
+                <select
+                  value={topUpBank}
+                  onChange={(e) => setTopUpBank(e.target.value)}
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-bold"
+                >
+                  <option value="">Select Payment Provider</option>
+                  {bankOptions.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  {presetAmounts.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => handlePresetSelect(p)}
+                      className={`py-3 rounded-xl text-xs font-black border-2 transition-all ${
+                        selectedPreset === p
+                          ? "bg-primary border-primary text-white"
+                          : "bg-background border-border text-muted-foreground"
+                      }`}
+                    >
+                      RM {p}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  value={amount}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setSelectedPreset(null);
+                  }}
+                  type="number"
+                  placeholder="Enter Amount (RM)"
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                />
+                <button
+                  onClick={handleTopUp}
+                  className="w-full py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                >
+                  Confirm Top Up
                 </button>
-              ))}
-            </div>
-            <input value={amount} onChange={(e) => { setAmount(e.target.value); setSelectedPreset(null); }} type="number" placeholder="Or enter custom amount (RM)"
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <button onClick={handleTopUp} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">Confirm Top Up</button>
-          </div>
-        )}
-
-        {/* Transfer Panel */}
-        {showTransfer && (
-          <div className="bg-card rounded-xl p-4 border border-border mb-4 animate-slide-up">
-            <h3 className="font-medium text-foreground text-sm mb-2">Transfer to User</h3>
-            <input value={transferTo} onChange={(e) => setTransferTo(e.target.value)} placeholder="Recipient username"
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="Amount (RM)"
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <button onClick={handleTransfer} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">Confirm Transfer</button>
-          </div>
-        )}
-
-        {/* Withdraw Panel */}
-        {showWithdraw && (
-          <div className="bg-card rounded-xl p-4 border border-border mb-4 animate-slide-up">
-            <h3 className="font-medium text-foreground text-sm mb-2">Withdraw to Bank Account</h3>
-            <select value={withdrawBank} onChange={(e) => setWithdrawBank(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
-              <option value="">Select Bank</option>
-              {bankOptions.map((b) => <option key={b} value={b}>{b}</option>)}
-            </select>
-            <input value={withdrawAccount} onChange={(e) => setWithdrawAccount(e.target.value)} placeholder="Account Number"
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="Amount (RM)"
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <button onClick={handleWithdraw} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">Confirm Withdrawal</button>
-          </div>
-        )}
-
-        <h3 className="font-semibold text-foreground mb-3">Transaction History</h3>
-        <div className="space-y-2">
-          {transactions.map((t) => (
-            <div key={t.id} className="bg-card rounded-xl p-3 flex items-center gap-3 border border-border">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.amount >= 0 ? "bg-accent" : "bg-destructive/10"}`}>
-                <Wallet className={`w-4 h-4 ${t.amount >= 0 ? "text-primary" : "text-destructive"}`} />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">{t.description}</p>
-                <p className="text-xs text-muted-foreground">{format(t.timestamp, "dd MMM yyyy, HH:mm")}</p>
+            )}
+
+            {showTransfer && (
+              <div className="space-y-4">
+                <input
+                  value={transferTo}
+                  onChange={(e) => setTransferTo(e.target.value)}
+                  placeholder="Recipient Username"
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                />
+                <input
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  type="number"
+                  placeholder="Amount (RM)"
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                />
+                <button
+                  onClick={handleTransfer}
+                  className="w-full py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                >
+                  Send Money
+                </button>
               </div>
-              <span className={`text-sm font-bold ${t.amount >= 0 ? "text-success" : "text-destructive"}`}>
-                {t.amount >= 0 ? "+" : ""}RM {Math.abs(t.amount).toFixed(2)}
-              </span>
-            </div>
-          ))}
+            )}
+
+            {showWithdraw && (
+              <div className="space-y-4">
+                <select
+                  value={withdrawBank}
+                  onChange={(e) => setWithdrawBank(e.target.value)}
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-bold"
+                >
+                  <option value="">Select Bank</option>
+                  {bankOptions.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={withdrawAccount}
+                  onChange={(e) => setWithdrawAccount(e.target.value)}
+                  placeholder="Account Number"
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                />
+                <input
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  type="number"
+                  placeholder="Amount (RM)"
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                />
+                <button
+                  onClick={handleWithdraw}
+                  className="w-full py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                >
+                  Confirm Withdrawal
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Transaction History Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-lg font-black text-foreground uppercase tracking-tight flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" /> Transaction History
+            </h3>
+            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              {transactions.length} Records
+            </span>
+          </div>
+
+          <div className="bg-card rounded-[2.5rem] shadow-xl border border-border/50 overflow-hidden divide-y divide-border/50">
+            {transactions.map((t) => (
+              <div
+                key={t.id}
+                className="p-5 flex items-center justify-between active:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                      t.amount > 0
+                        ? "bg-emerald-500/10 text-emerald-500"
+                        : "bg-rose-500/10 text-rose-500"
+                    }`}
+                  >
+                    {t.amount > 0 ? (
+                      <ArrowUpRight className="w-6 h-6" />
+                    ) : (
+                      <ArrowDownLeft className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-foreground leading-tight uppercase tracking-tight">
+                      {t.description}
+                    </p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                      {format(new Date(t.timestamp), "dd MMM yyyy • HH:mm")}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p
+                    className={`text-sm font-black ${
+                      t.amount > 0 ? "text-emerald-500" : "text-rose-500"
+                    }`}
+                  >
+                    {t.amount > 0 ? "+" : "-"} RM{" "}
+                    {Math.abs(t.amount).toFixed(2)}
+                  </p>
+                  <div className="flex items-center justify-end gap-1 mt-0.5">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">
+                      Success
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

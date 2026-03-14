@@ -32,7 +32,6 @@ const MePage = () => {
 
   const settingItems = [
     { icon: Settings, label: t("settings"), path: "/settings" },
-    { icon: HelpCircle, label: t("help_center"), path: "/help" },
     { icon: Info, label: t("about_us"), path: "/about" },
   ];
 
@@ -54,13 +53,6 @@ const MePage = () => {
             <h1 className="text-2xl font-bold text-white">
               {currentUser.username}
             </h1>
-            <p className="text-white/70 text-sm">{currentUser.email}</p>
-            <button
-              onClick={() => navigate("/profile")}
-              className="mt-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors border border-white/10"
-            >
-              {t("edit_profile")}
-            </button>
           </div>
         </div>
       </div>

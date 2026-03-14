@@ -20,6 +20,7 @@ import {
 import PageHeader from "@/components/PageHeader";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
+import AIChatWidget from "@/components/AIChatWidget";
 
 const SettingsPage = () => {
   const {
@@ -368,6 +369,9 @@ const SettingsPage = () => {
           </div>
         </Modal>
       )}
+
+      {/* AI Chat Widget */}
+      <AIChatWidget />
     </div>
   );
 };
