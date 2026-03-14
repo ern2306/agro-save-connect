@@ -4,7 +4,6 @@ import { Package, CheckCircle, XCircle, ShoppingBag, Truck, Heart } from "lucide
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
-import { toast } from "sonner";
 
 const NotificationsPage = () => {
   const { notifications, orders, currentUser, listings } = useApp();
@@ -14,15 +13,13 @@ const NotificationsPage = () => {
   const buyerNotifs = notifications.filter((n) =>
     ["order_shipped", "order_confirmed", "order_cancelled", "donation"].includes(n.type)
   );
-  
-  // Seller Updates: only show notifications for orders where the item belongs to user's listings
+
   const userListingIds = listings.map((l) => l.id);
   const sellerNotifs = notifications.filter((n) => {
     if (!["new_order", "order_cancelled_seller", "order_preparing"].includes(n.type)) {
       return false;
     }
     const order = orders.find((o) => o.id === n.orderId);
-    // Only include if order exists, buyer is NOT current user, AND listing is in user's active listings
     return order && order.buyerId !== currentUser.id && userListingIds.includes(order.listing.id);
   });
 
@@ -43,8 +40,8 @@ const NotificationsPage = () => {
 
   const handleClick = (n: typeof notifications[0]) => {
     if (n.type === "donation") {
-      // Donation notifications: show a toast with details since there's no dedicated page
-      toast.info(n.message);
+      // Navigate to donation details page instead of showing full text
+      navigate(`/donation-details/${n.id}`);
       return;
     }
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
@@ -91,7 +88,11 @@ const NotificationsPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-sm text-foreground">{n.title}</h3>
-              <p className="text-xs text-muted-foreground line-clamp-3">{n.message}</p>
+              <p className="text-xs text-muted-foreground line-clamp-3">
+                {n.type === "donation"
+                  ? "Click to see details"
+                  : n.message}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {formatDistanceToNow(n.timestamp, { addSuffix: true })}
               </p>
