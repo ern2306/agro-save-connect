@@ -156,24 +156,12 @@ const OrderPage = () => {
 
             {listing.sellerId !== currentUser.id && (
               <div className="flex gap-2 mt-3">
-                {!showChatBox ? (
-                  <button onClick={handleMessageSeller}
-                    className="py-2 px-4 rounded-lg border border-primary text-primary text-sm font-medium flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4" /> Chat With Seller
-                  </button>
-                ) : (
-                  <div className="flex-1 space-y-2">
-                    <textarea
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      placeholder={`Hi, I'm interested in your ${listing.name}!`}
-                      rows={3}
-                      className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-                    />
-                    <div className="flex gap-2">
-                      <button onClick={handleSendChat}
-                        className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2">
-                        <MessageCircle className="w-4 h-4" /> Send Message
+                <button onClick={handleMessageSeller}
+                  className="py-2 px-4 rounded-lg border border-primary text-primary text-sm font-medium flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" /> Chat With Seller
+                </button>
+              </div>
+            )}
                       </button>
                       <button onClick={() => setShowChatBox(false)}
                         className="py-2 px-3 rounded-lg border border-border text-foreground text-sm font-medium">
