@@ -164,8 +164,6 @@ const OrderPage = () => {
             )}
           </div>
         </div>
-          </div>
-        </div>
 
         <div className="bg-card rounded-xl p-4 border border-border mb-4">
           <label className="text-sm font-medium text-foreground mb-2 block">Quantity (kg)</label>
