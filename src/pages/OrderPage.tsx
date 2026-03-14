@@ -56,30 +56,6 @@ const OrderPage = () => {
     }
   };
 
-  const handleSendChat = () => {
-    if (listing.sellerId === currentUser.id) return;
-    const msgText = chatMessage.trim() || `Hi, I'm interested in your ${listing.name}!`;
-    const existing = chatThreads.find((t) => t.participantId === listing.sellerId);
-    if (existing) {
-      const newMsg = { id: `m${Date.now()}`, senderId: currentUser.id, text: msgText, timestamp: new Date() };
-      setChatThreads(chatThreads.map((t) =>
-        t.id === existing.id ? { ...t, messages: [...t.messages, newMsg] } : t
-      ));
-      navigate(`/chat/${existing.id}`);
-    } else {
-      const newThread = {
-        id: `c${Date.now()}`,
-        participantId: listing.sellerId,
-        participantName: listing.seller,
-        participantAvatar: "👨‍🌾",
-        messages: [
-          { id: `m${Date.now()}`, senderId: currentUser.id, text: msgText, timestamp: new Date() },
-        ],
-      };
-      setChatThreads([newThread, ...chatThreads]);
-      navigate(`/chat/${newThread.id}`);
-    }
-  };
 
   const handlePurchase = () => {
     if (walletBalance < total) {
