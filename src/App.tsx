@@ -1,8 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppProvider } from "@/context/AppContext";
+import { AppProvider, useApp } from "@/context/AppContext";
 import BottomNav from "@/components/BottomNav";
 import SplashPage from "@/pages/SplashPage";
 import ExplorePage from "@/pages/ExplorePage";
@@ -35,9 +41,16 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const location = useLocation();
+  const { currentUser } = useApp();
 
   // Pages where BottomNav should be HIDDEN
   const hideNavPaths = ["/", "/login"];
+
+  // Simple auth guard
+  const isAuthPage = hideNavPaths.includes(location.pathname);
+  if (!currentUser && !isAuthPage) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Check if current path is a chat or farmer profile or donation detail
   const isChatPage = location.pathname.startsWith("/chat/");
