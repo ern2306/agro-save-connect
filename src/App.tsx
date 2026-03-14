@@ -25,6 +25,10 @@ import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
 import DonationDetailsPage from "@/pages/DonationDetailsPage";
 import LoginPage from "@/pages/LoginPage";
+import SettingsPage from "@/pages/SettingsPage";
+import HelpCenterPage from "@/pages/HelpCenterPage";
+import AboutUsPage from "@/pages/AboutUsPage";
+import FarmerProfilePage from "@/pages/FarmerProfilePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +62,10 @@ const AppRoutes = () => {
         <Route path="/donation-details/:id" element={<DonationDetailsPage />} />
         <Route path="/community-map" element={<CommunityMapPage />} />
         <Route path="/print-label/:tracking" element={<PrintLabelPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/help" element={<HelpCenterPage />} />
+        <Route path="/about" element={<AboutUsPage />} />
+        <Route path="/farmer/:id" element={<FarmerProfilePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {shouldShowNav && <BottomNav />}

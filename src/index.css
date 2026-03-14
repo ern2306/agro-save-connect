@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
 
 @layer base {
   :root {
@@ -55,6 +55,45 @@
     --info: 210 80% 55%;
     --info-foreground: 0 0% 100%;
   }
+
+  .dark {
+    --background: 150 10% 8%;
+    --foreground: 120 20% 95%;
+
+    --card: 150 10% 12%;
+    --card-foreground: 120 20% 95%;
+
+    --popover: 150 10% 12%;
+    --popover-foreground: 120 20% 95%;
+
+    --primary: 142 60% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --primary-light: 150 10% 15%;
+    --primary-dark: 142 70% 35%;
+
+    --secondary: 38 92% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 150 10% 15%;
+    --muted-foreground: 150 5% 65%;
+
+    --accent: 150 10% 18%;
+    --accent-foreground: 142 60% 50%;
+
+    --border: 150 10% 18%;
+    --input: 150 10% 18%;
+    --ring: 142 60% 45%;
+
+    --splash-bg: 150 10% 8%;
+
+    --nav-bg: 150 10% 12%;
+    --nav-active: 142 60% 45%;
+    --nav-inactive: 150 5% 45%;
+
+    --wallet-gradient-from: 142 60% 45%;
+    --wallet-gradient-to: 142 70% 35%;
+  }
 }
 
 @layer base {
@@ -63,8 +102,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Poppins', sans-serif;
+    @apply bg-background text-foreground font-sans transition-colors duration-300;
+    font-family: "Poppins", sans-serif;
   }
 }
 

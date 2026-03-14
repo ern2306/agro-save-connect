@@ -9,25 +9,32 @@ import {
   Heart,
   Bell,
   ChevronRight,
-  Globe
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import PageHeader from "@/components/PageHeader";
 import { formatDistanceToNow } from "date-fns";
 
 const ALLOWED_SELLER_CROPS = ["cabbage", "kangkung", "broccoli"];
 
 const NotificationsPage = () => {
-  const { notifications, orders, currentUser, t, language, setLanguage } = useApp();
+  const { notifications, orders, currentUser, t } = useApp();
   const [tab, setTab] = useState<"buyer" | "seller">("buyer");
   const navigate = useNavigate();
 
   const buyerNotifs = notifications.filter((n) =>
-    ["order_shipped", "order_confirmed", "order_cancelled", "donation"].includes(n.type)
+    [
+      "order_shipped",
+      "order_confirmed",
+      "order_cancelled",
+      "donation",
+    ].includes(n.type)
   );
 
   const sellerNotifs = notifications.filter((n) => {
-    if (!["new_order", "order_cancelled_seller", "order_preparing"].includes(n.type)) {
+    if (
+      !["new_order", "order_cancelled_seller", "order_preparing"].includes(
+        n.type
+      )
+    ) {
       return false;
     }
     const order = orders.find((o) => o.id === n.orderId);
@@ -41,60 +48,93 @@ const NotificationsPage = () => {
   const getIconConfig = (type: string) => {
     switch (type) {
       case "order_shipped":
-        return { icon: Truck, bg: "bg-blue-50 dark:bg-blue-950/30", color: "text-blue-600 dark:text-blue-400", label: "Shipped" };
+        return {
+          icon: Truck,
+          bg: "bg-blue-50 dark:bg-blue-950/30",
+          color: "text-blue-600 dark:text-blue-400",
+          label: "Shipped",
+        };
       case "order_confirmed":
-        return { icon: CheckCircle, bg: "bg-emerald-50 dark:bg-emerald-950/30", color: "text-emerald-600 dark:text-emerald-400", label: "Confirmed" };
+        return {
+          icon: CheckCircle,
+          bg: "bg-emerald-50 dark:bg-emerald-950/30",
+          color: "text-emerald-600 dark:text-emerald-400",
+          label: "Confirmed",
+        };
       case "order_cancelled":
       case "order_cancelled_seller":
-        return { icon: XCircle, bg: "bg-red-50 dark:bg-red-950/30", color: "text-red-500 dark:text-red-400", label: "Cancelled" };
+        return {
+          icon: XCircle,
+          bg: "bg-red-50 dark:bg-red-950/30",
+          color: "text-red-500 dark:text-red-400",
+          label: "Cancelled",
+        };
       case "new_order":
-        return { icon: ShoppingBag, bg: "bg-primary/10", color: "text-primary", label: "New Order" };
+        return {
+          icon: ShoppingBag,
+          bg: "bg-primary/10",
+          color: "text-primary",
+          label: "New Order",
+        };
       case "order_preparing":
-        return { icon: Package, bg: "bg-amber-50 dark:bg-amber-950/30", color: "text-amber-600 dark:text-amber-400", label: "Preparing" };
+        return {
+          icon: Package,
+          bg: "bg-amber-50 dark:bg-amber-950/30",
+          color: "text-amber-600 dark:text-amber-400",
+          label: "Preparing",
+        };
       case "donation":
-        return { icon: Heart, bg: "bg-rose-50 dark:bg-rose-950/30", color: "text-rose-500 dark:text-rose-400", label: "Donation" };
+        return {
+          icon: Heart,
+          bg: "bg-rose-50 dark:bg-rose-950/30",
+          color: "text-rose-500 dark:text-rose-400",
+          label: "Donation",
+        };
       default:
-        return { icon: Bell, bg: "bg-muted", color: "text-muted-foreground", label: "Update" };
+        return {
+          icon: Bell,
+          bg: "bg-muted",
+          color: "text-muted-foreground",
+          label: "Update",
+        };
     }
   };
 
-  const handleClick = (n: typeof notifications[0]) => {
+  const handleClick = (n: (typeof notifications)[0]) => {
     if (n.type === "donation") {
       const mockDonationData = {
         id: n.id,
         crop: n.message.split(" ")[3] || "Crops",
         kg: n.message.split(" ")[2] || "0",
-        org: n.message.includes("to ") ? n.message.split("to ")[1].split(".")[0] : "Community Org",
+        org: n.message.includes("to ")
+          ? n.message.split("to ")[1].split(".")[0]
+          : "Community Org",
         method: n.message.includes("Tracking") ? "pickup" : "dropoff",
-        tracking: n.message.includes("Tracking Number: ") ? n.message.split("Tracking Number: ")[1].split(".")[0] : null,
-        address: n.message.includes("location: ") ? n.message.split("location: ")[1].split(".")[0] : "12, Jalan Bangsar Utama, 59000 KL",
-        timestamp: n.timestamp
+        tracking: n.message.includes("Tracking Number: ")
+          ? n.message.split("Tracking Number: ")[1].split(".")[0]
+          : null,
+        address: n.message.includes("location: ")
+          ? n.message.split("location: ")[1].split(".")[0]
+          : "12, Jalan Bangsar Utama, 59000 KL",
+        timestamp: n.timestamp,
       };
       navigate(`/donation-details/${n.id}`, { state: mockDonationData });
       return;
     }
     if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
-    else if (n.type === "order_cancelled_seller") navigate(`/refund/${n.orderId}`);
-    else if (n.type === "order_preparing") navigate(`/order-details/${n.orderId}?from=seller`);
+    else if (n.type === "order_cancelled_seller")
+      navigate(`/refund/${n.orderId}`);
+    else if (n.type === "order_preparing")
+      navigate(`/order-details/${n.orderId}?from=seller`);
     else navigate(`/order-details/${n.orderId}?from=notification`);
   };
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border sticky top-0 z-10">
-        <h1 className="text-lg font-bold text-foreground">{t("notifications")}</h1>
-        <div className="flex items-center gap-1 bg-muted/50 rounded-full px-2 py-1">
-          <Globe className="w-3.5 h-3.5 text-muted-foreground" />
-          <select 
-            value={language} 
-            onChange={(e) => setLanguage(e.target.value as any)}
-            className="bg-transparent text-[10px] font-bold text-foreground focus:outline-none uppercase"
-          >
-            <option value="en">EN</option>
-            <option value="zh">ZH</option>
-            <option value="ms">MS</option>
-          </select>
-        </div>
+        <h1 className="text-lg font-bold text-foreground">
+          {t("notifications")}
+        </h1>
       </div>
 
       {/* Tab bar */}
@@ -129,7 +169,9 @@ const NotificationsPage = () => {
             <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-3">
               <Bell className="w-6 h-6 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium text-foreground">{t("no_notifications")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("no_notifications")}
+            </p>
           </div>
         )}
 
@@ -143,24 +185,32 @@ const NotificationsPage = () => {
               className="w-full bg-card rounded-xl border border-border text-left active:scale-[0.99] transition-transform shadow-sm overflow-hidden"
             >
               <div className="p-4 flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0`}>
+                <div
+                  className={`w-10 h-10 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0`}
+                >
                   <IconComponent className={`w-5 h-5 ${cfg.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <h3 className="font-semibold text-sm text-foreground leading-tight">{n.title}</h3>
+                        <h3 className="font-semibold text-sm text-foreground leading-tight">
+                          {n.title}
+                        </h3>
                         {!n.read && (
                           <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {n.message}
+                      </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                   </div>
                   <div className="flex items-center justify-between mt-2">
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}>
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}
+                    >
                       {cfg.label}
                     </span>
                     <span className="text-[10px] text-muted-foreground">

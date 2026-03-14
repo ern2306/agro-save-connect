@@ -3,7 +3,6 @@ import {
   User,
   Wallet,
   Package,
-  MessageSquare,
   MapPin,
   LogOut,
   ChevronRight,
@@ -28,7 +27,6 @@ const MePage = () => {
       extra: `RM ${walletBalance.toFixed(2)}`,
     },
     { icon: Package, label: t("my_listings"), path: "/my-listings" },
-    { icon: MessageSquare, label: t("messages"), path: "/messages" },
     { icon: MapPin, label: t("community_map"), path: "/community-map" },
   ];
 
