@@ -1,33 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import NotificationsPage from "./pages/NotificationsPage";
-import DonationDetailsPage from "./pages/DonationDetailsPage";
-import HomePage from "./pages/HomePage";
-import OrderDetailsPage from "./pages/OrderDetailsPage";
-import NewOrderPage from "./pages/NewOrderPage";
-import RefundPage from "./pages/RefundPage";
+import { useParams } from "react-router-dom";
 
-function App() {
+const DonationDetailsPage = () => {
+  const { id } = useParams();
+
   return (
-    <Router>
-      <Routes>
-
-        {/* Home */}
-        <Route path="/" element={<HomePage />} />
-
-        {/* Notifications */}
-        <Route path="/notifications" element={<NotificationsPage />} />
-
-        {/* Donation Details */}
-        <Route path="/donation-details/:id" element={<DonationDetailsPage />} />
-
-        {/* Other pages */}
-        <Route path="/order-details/:id" element={<OrderDetailsPage />} />
-        <Route path="/new-order/:id" element={<NewOrderPage />} />
-        <Route path="/refund/:id" element={<RefundPage />} />
-
-      </Routes>
-    </Router>
+    <div className="p-6">
+      <h1 className="text-xl font-bold">Donation Details</h1>
+      <p>Donation ID: {id}</p>
+    </div>
   );
-}
+};
 
-export default App;
+export default DonationDetailsPage;
