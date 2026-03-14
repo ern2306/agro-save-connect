@@ -11,7 +11,7 @@ const MessagesPage = () => {
     <div className="min-h-screen bg-background pb-20">
       <PageHeader title="Messages" showBack />
       <div className="px-4 py-3 space-y-2">
-        {chatThreads.map((thread) => {
+        {chatThreads.filter((t) => t.messages.length > 0).map((thread) => {
           const lastMsg = thread.messages[thread.messages.length - 1];
           return (
             <button
