@@ -35,8 +35,24 @@ const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const location = useLocation();
+
+  // Pages where BottomNav should be HIDDEN
   const hideNavPaths = ["/", "/login"];
-  const shouldShowNav = !hideNavPaths.includes(location.pathname);
+
+  // Check if current path is a chat or farmer profile or donation detail
+  const isChatPage = location.pathname.startsWith("/chat/");
+  const isFarmerPage = location.pathname.startsWith("/farmer/");
+  const isDonatePage = location.pathname.startsWith("/donate-surplus/");
+  const isPrintPage = location.pathname.startsWith("/print-label/");
+  const isDonationDetails = location.pathname.startsWith("/donation-details/");
+
+  const shouldShowNav =
+    !hideNavPaths.includes(location.pathname) &&
+    !isChatPage &&
+    !isFarmerPage &&
+    !isDonatePage &&
+    !isPrintPage &&
+    !isDonationDetails;
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-background relative shadow-2xl border-x border-border/50">

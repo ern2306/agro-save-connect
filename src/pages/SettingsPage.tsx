@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Moon,
@@ -15,38 +15,42 @@ import {
   Key,
   ShieldCheck,
   UserX,
+  Loader2,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
-  const { t } = useApp();
+  const {
+    t,
+    isDarkMode,
+    setIsDarkMode,
+    blockedUserIds,
+    setBlockedUserIds,
+    listings,
+  } = useApp();
   const navigate = useNavigate();
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return (
-      localStorage.getItem("theme") === "dark" ||
-      document.documentElement.classList.contains("dark")
-    );
-  });
   const [isLiveLocation, setIsLiveLocation] = useState(true);
   const [isNotifications, setIsNotifications] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Modal states
   const [activeModal, setActiveModal] = useState<
     "password" | "privacy" | "blocked" | null
   >(null);
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
+  // Find blocked user names for display
+  const blockedUsers = blockedUserIds.map((id) => {
+    const listing = listings.find((l) => l.sellerId === id);
+    return { id, name: listing?.seller || `User ${id}` };
+  });
+
+  const handleUnblock = (id: string) => {
+    setBlockedUserIds((prev) => prev.filter((uid) => uid !== id));
+    toast.success("User unblocked");
+  };
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -54,11 +58,20 @@ const SettingsPage = () => {
   };
 
   const handleClearCache = () => {
-    toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
-      loading: "Analyzing storage...",
-      success: "12.4MB Cache cleared successfully!",
-      error: "Failed to clear cache",
-    });
+    setIsProcessing(true);
+    toast.promise(
+      new Promise((resolve) =>
+        setTimeout(() => {
+          setIsProcessing(false);
+          resolve(true);
+        }, 2000)
+      ),
+      {
+        loading: "Analyzing storage...",
+        success: "12.4MB Cache cleared successfully!",
+        error: "Failed to clear cache",
+      }
+    );
   };
 
   const handleDevicePermissions = () => {
@@ -76,8 +89,8 @@ const SettingsPage = () => {
     children: React.ReactNode;
     onClose: () => void;
   }) => (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300">
-      <div className="bg-card w-full max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 pb-10 sm:pb-6 animate-in slide-in-from-bottom duration-500 shadow-2xl border border-border/50">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in duration-300 p-4">
+      <div className="bg-card w-full max-w-md rounded-[2.5rem] p-6 pb-10 sm:pb-6 animate-in slide-in-from-bottom duration-500 shadow-2xl border border-border/50">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-foreground tracking-tight">
             {title}
@@ -144,9 +157,10 @@ const SettingsPage = () => {
           color: "text-indigo-500 bg-indigo-500/10",
         },
         {
-          icon: Eye,
+          icon: UserX,
           label: "Blocked Users",
           type: "link",
+          value: blockedUserIds.length > 0 ? `${blockedUserIds.length}` : "",
           action: () => setActiveModal("blocked"),
           color: "text-gray-500 bg-gray-500/10",
         },
@@ -203,27 +217,35 @@ const SettingsPage = () => {
                       {item.label}
                     </span>
                   </div>
-                  {item.type === "toggle" ? (
-                    <button
-                      onClick={item.action}
-                      className={`w-11 h-6 rounded-full transition-all duration-300 relative ${
-                        item.value ? "bg-primary" : "bg-muted"
-                      }`}
-                    >
-                      <div
-                        className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${
-                          item.value ? "left-6" : "left-1"
+                  <div className="flex items-center gap-3">
+                    {item.value !== undefined &&
+                      typeof item.value === "string" && (
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                          {item.value}
+                        </span>
+                      )}
+                    {item.type === "toggle" ? (
+                      <button
+                        onClick={item.action}
+                        className={`w-11 h-6 rounded-full transition-all duration-300 relative ${
+                          item.value ? "bg-primary" : "bg-muted"
                         }`}
-                      />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={item.action}
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  )}
+                      >
+                        <div
+                          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${
+                            item.value ? "left-6" : "left-1"
+                          }`}
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={item.action}
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -308,17 +330,41 @@ const SettingsPage = () => {
       {/* Blocked Users Modal */}
       {activeModal === "blocked" && (
         <Modal title="Blocked Users" onClose={() => setActiveModal(null)}>
-          <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-              <UserX className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <p className="text-sm font-medium text-foreground">
-              No Blocked Users
-            </p>
-            <p className="text-xs text-muted-foreground max-w-[200px]">
-              Users you block will appear here. They won't be able to message
-              you or see your listings.
-            </p>
+          <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 scrollbar-hide">
+            {blockedUsers.length > 0 ? (
+              blockedUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-4 bg-muted/50 rounded-2xl border border-border"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-card flex items-center justify-center text-xl shadow-sm">
+                      👨‍🌾
+                    </div>
+                    <span className="font-bold text-sm">{user.name}</span>
+                  </div>
+                  <button
+                    onClick={() => handleUnblock(user.id)}
+                    className="px-4 py-2 bg-primary/10 text-primary text-xs font-black rounded-lg hover:bg-primary/20 transition-colors"
+                  >
+                    UNBLOCK
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <UserX className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  No Blocked Users
+                </p>
+                <p className="text-xs text-muted-foreground max-w-[200px]">
+                  Users you block will appear here. They won't be able to
+                  message you or see your listings.
+                </p>
+              </div>
+            )}
           </div>
         </Modal>
       )}

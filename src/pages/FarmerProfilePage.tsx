@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Star,
@@ -9,11 +9,11 @@ import {
   ChevronRight,
   Package,
   Calendar,
-  Phone,
   UserX,
   X,
   AlertTriangle,
   CheckCircle2,
+  Edit3,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
@@ -21,18 +21,31 @@ import { toast } from "sonner";
 const FarmerProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { listings } = useApp();
+  const {
+    listings,
+    createChatIfNotExist,
+    blockedUserIds,
+    setBlockedUserIds,
+    currentUser,
+  } = useApp();
 
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
-  const [blockCount, setBlockCount] = useState(12); // Mocked initial block count
-  const [rating, setRating] = useState(4.9);
-  const [isBlocked, setIsBlocked] = useState(false);
+
+  // Check if viewing own profile
+  const isOwnProfile = id === currentUser.id;
 
   // Mocking farmer data
   const farmerListings = listings.filter((l) => l.sellerId === id);
-  const farmerName = farmerListings[0]?.seller || "Farmer Profile";
-  const farmerAvatar = "👨‍🌾";
+  const farmerName = isOwnProfile
+    ? currentUser.username
+    : farmerListings[0]?.seller || "Farmer Profile";
+  const farmerAvatar = isOwnProfile ? currentUser.avatar : "👨‍🌾";
+
+  const isBlocked = blockedUserIds.includes(id || "");
+  // User requested report counts to be either 0 or 1
+  const reportCount = isBlocked ? 1 : 0;
+  const rating = isBlocked ? 4.5 : 4.9;
 
   const blockReasons = [
     "False Information / Fake Items",
@@ -42,38 +55,38 @@ const FarmerProfilePage = () => {
     "Other Reasons",
   ];
 
-  // Simulate rating drop based on block count
-  useEffect(() => {
-    const baseRating = 5.0;
-    const drop = blockCount / 50; // Every 50 blocks drop 1 star
-    setRating(Math.max(1.0, Number((baseRating - drop).toFixed(1))));
-  }, [blockCount]);
-
   const handleBlock = () => {
-    if (!selectedReason) {
+    if (!selectedReason || !id) {
       toast.error("Please select a reason for blocking");
       return;
     }
 
-    setBlockCount((prev) => prev + 1);
-    setIsBlocked(true);
+    setBlockedUserIds((prev) => [...prev, id]);
     setIsBlockModalOpen(false);
     toast.success(`${farmerName} has been blocked`, {
-      description: `Reason: ${selectedReason}. Their rating will be affected.`,
+      description: `Reason: ${selectedReason}.`,
       icon: <UserX className="w-4 h-4 text-red-500" />,
     });
   };
 
   const handleChatClick = () => {
-    if (isBlocked) return;
-    // Navigate to chat with this specific farmer
+    if (isBlocked || !id || isOwnProfile) return;
+    createChatIfNotExist(id, farmerName);
     navigate(`/chat/${id}`);
   };
 
   const stats = [
-    { label: "Total Sales", value: "1,240+", icon: Package },
-    { label: "Joined", value: "Jan 2024", icon: Calendar },
-    { label: "Reports", value: blockCount, icon: AlertTriangle },
+    {
+      label: "Total Sales",
+      value: isOwnProfile ? "850+" : "1,240+",
+      icon: Package,
+    },
+    {
+      label: "Joined",
+      value: isOwnProfile ? "Mar 2024" : "Jan 2024",
+      icon: Calendar,
+    },
+    { label: "Reports", value: reportCount, icon: AlertTriangle },
   ];
 
   return (
@@ -88,8 +101,8 @@ const FarmerProfilePage = () => {
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        {/* Block Button */}
-        {!isBlocked && (
+        {/* Block Button (Hide if own profile) */}
+        {!isBlocked && !isOwnProfile && (
           <button
             onClick={() => setIsBlockModalOpen(true)}
             className="absolute top-12 right-6 w-10 h-10 rounded-full bg-red-500/20 backdrop-blur-md flex items-center justify-center text-white border border-red-500/30 z-10 hover:bg-red-500/40 transition-colors"
@@ -120,7 +133,7 @@ const FarmerProfilePage = () => {
                   : "text-foreground"
               }`}
             >
-              {farmerName}
+              {farmerName} {isOwnProfile && "(You)"}
             </h1>
             {!isBlocked && (
               <ShieldCheck className="w-5 h-5 text-blue-500 fill-blue-500/10" />
@@ -137,34 +150,41 @@ const FarmerProfilePage = () => {
                 }`}
               />
               <span className="text-foreground">{rating}</span>
-              <span>({240 + blockCount} interactions)</span>
+              <span>
+                ({isOwnProfile ? 150 : 240 + reportCount} interactions)
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-primary" />
-              <span>Semenyih, Selangor</span>
+              <span>
+                {isOwnProfile ? "Kuala Lumpur" : "Semenyih, Selangor"}
+              </span>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3 w-full mb-8">
-            <button
-              disabled={isBlocked}
-              onClick={handleChatClick}
-              className={`flex-1 font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${
-                isBlocked
-                  ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
-                  : "bg-primary text-primary-foreground shadow-primary/20"
-              }`}
-            >
-              <MessageSquare className="w-5 h-5" />{" "}
-              {isBlocked ? "Blocked" : "Chat"}
-            </button>
-            <button
-              disabled={isBlocked}
-              className="w-14 h-14 bg-card border border-border rounded-2xl flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-sm disabled:opacity-50"
-            >
-              <Phone className="w-5 h-5" />
-            </button>
+            {isOwnProfile ? (
+              <button
+                onClick={() => navigate("/profile")}
+                className="w-full bg-muted text-foreground font-bold py-4 rounded-2xl shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <Edit3 className="w-5 h-5" /> Edit My Profile
+              </button>
+            ) : (
+              <button
+                disabled={isBlocked}
+                onClick={handleChatClick}
+                className={`w-full font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${
+                  isBlocked
+                    ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
+                    : "bg-primary text-primary-foreground shadow-primary/20"
+                }`}
+              >
+                <MessageSquare className="w-5 h-5" />{" "}
+                {isBlocked ? "Blocked" : "Chat with Farmer"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -201,7 +221,7 @@ const FarmerProfilePage = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
               <h2 className="text-lg font-bold text-foreground tracking-tight">
-                Active Listings
+                {isOwnProfile ? "My Active Listings" : "Active Listings"}
               </h2>
               <span className="text-xs font-bold text-primary uppercase tracking-widest">
                 {farmerListings.length} Items
