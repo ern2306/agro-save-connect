@@ -15,7 +15,9 @@ const BottomNav = () => {
 
   // Hide on splash, chat detail, and some sub-pages
   const hideOn = ["/", "/splash"];
-  if (hideOn.includes(location.pathname)) return null;
+  const hideChat = location.pathname.startsWith("/chat");
+
+  if (hideOn.includes(location.pathname) || hideChat) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-bottom">
