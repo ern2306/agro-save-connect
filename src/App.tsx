@@ -22,7 +22,7 @@ import EditListingPage from "@/pages/EditListingPage";
 import MessagesPage from "@/pages/MessagesPage";
 import ChatPage from "@/pages/ChatPage";
 import DonateSurplusPage from "@/pages/DonateSurplusPage";
-import DonationDetailsPage from "@/pages/DonationDetailsPage"; // ✅ added
+import DonationDetailsPage from "@/pages/DonationDetailsPage"; 
 import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
 import NotFound from "@/pages/NotFound";
