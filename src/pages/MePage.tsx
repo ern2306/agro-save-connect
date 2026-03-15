@@ -39,10 +39,17 @@ const MePage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("agro_user");
+    // Clear user from context
     setCurrentUser(null);
+
+    // Remove user from localStorage
+    localStorage.removeItem("agro_user");
+
+    // Show logout message
     toast.info("Logged out");
-    navigate("/login"); // Redirect to login page
+
+    // Redirect to login page with replace to prevent back navigation
+    navigate("/login", { replace: true });
   };
 
   const menuItems = [
@@ -93,13 +100,6 @@ const MePage = () => {
               </p>
               <Copy className="w-3 h-3 group-active:scale-90 transition-transform" />
             </div>
-
-            <button
-              onClick={() => navigate("/profile")}
-              className="mt-3 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors border border-white/10"
-            >
-              {t("edit_profile")}
-            </button>
           </div>
         </div>
       </div>
