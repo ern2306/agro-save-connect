@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, ArrowRight, Leaf, AlertCircle, Fingerprint } from "lucide-react";
+import { Mail, Lock, ArrowRight, Leaf, Fingerprint } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
 
@@ -10,30 +10,34 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [usePasskey, setUsePasskey] = useState(false);
   const [isAutoLogin, setIsAutoLogin] = useState(false);
 
-  // Auto-login on component mount if user was previously logged in
   useEffect(() => {
+    // Check if user is already logged in
+    if (currentUser?.id) {
+      navigate("/explore", { replace: true });
+      return;
+    }
+
+    // Try to restore user from localStorage
     const savedUser = localStorage.getItem("agrosave_user");
-    if (savedUser && !currentUser.id) {
+    if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
-        setCurrentUser(user);
-        setIsAutoLogin(true);
-        toast.success("Auto-login successful!");
-        setTimeout(() => {
+        if (user?.id) {
+          setIsAutoLogin(true);
+          setCurrentUser(user);
+          toast.success("Welcome back!");
           navigate("/explore", { replace: true });
-        }, 500);
+        }
       } catch (error) {
         console.error("Failed to restore user session:", error);
         localStorage.removeItem("agrosave_user");
       }
     }
-  }, []);
+  }, [currentUser?.id, navigate, setCurrentUser]);
 
   const handlePasskeyLogin = () => {
-    // Passkey for John Farmer: "john123"
     setIsLoading(true);
     setTimeout(() => {
       const johnFarmerUser = {
@@ -50,7 +54,7 @@ const LoginPage = () => {
       toast.success("Passkey login successful!");
       navigate("/explore", { replace: true });
       setIsLoading(false);
-    }, 1500);
+    }, 1000);
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -61,30 +65,8 @@ const LoginPage = () => {
       return;
     }
 
-    // Check for John Farmer passkey
-    if (email.toLowerCase() === "john@agrosave.com" && password === "john123") {
-      setIsLoading(true);
-      setTimeout(() => {
-        const johnFarmerUser = {
-          id: "user1",
-          username: "John Farmer",
-          phone: "+60123456789",
-          email: email,
-          address: "123 Farm Road, Kuala Lumpur",
-          avatar: "👨‍🌾",
-          accountNumber: "AGS3847291056",
-        };
-        setCurrentUser(johnFarmerUser);
-        localStorage.setItem("agrosave_user", JSON.stringify(johnFarmerUser));
-        toast.success("Login successful!");
-        navigate("/explore", { replace: true });
-        setIsLoading(false);
-      }, 1500);
-      return;
-    }
-
-    // Generic login for any other email/password
     setIsLoading(true);
+
     setTimeout(() => {
       const user = {
         id: `user_${Date.now()}`,
@@ -93,14 +75,15 @@ const LoginPage = () => {
         email: email,
         address: "123 Farm Road, Kuala Lumpur",
         avatar: "👤",
-        accountNumber: `AGS${Math.random().toString().slice(2, 12)}`,
+        accountNumber: `AGS${Math.floor(Math.random() * 10000000000)}`,
       };
+
       setCurrentUser(user);
       localStorage.setItem("agrosave_user", JSON.stringify(user));
       toast.success("Login successful!");
       navigate("/explore", { replace: true });
       setIsLoading(false);
-    }, 1500);
+    }, 1000);
   };
 
   if (isAutoLogin) {
@@ -195,11 +178,14 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Divider */}
+        {/* Sign Up Link */}
         <div className="mt-8 pt-6 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <button className="text-primary font-semibold hover:underline">
+            <button
+              onClick={() => navigate("/signup")}
+              className="text-primary font-semibold hover:underline"
+            >
               Create Account
             </button>
           </p>
@@ -207,7 +193,7 @@ const LoginPage = () => {
 
         {/* Demo Notice */}
         <div className="mt-8 flex items-start gap-2 text-muted-foreground">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="text-lg">ℹ️</div>
           <p className="text-[10px] leading-relaxed">
             Demo passkey: john@agrosave.com / john123. You can also log in with any email and password. Your session will be saved automatically.
           </p>

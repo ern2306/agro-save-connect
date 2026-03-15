@@ -25,6 +25,7 @@ import DonateSurplusPage from "@/pages/DonateSurplusPage";
 import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
 import SettingsPage from "@/pages/SettingsPage";
+import FarmerProfilePage from "@/pages/FarmerProfilePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const AppContent = () => {
         <Route path="/print-label/:tracking" element={<PrintLabelPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/blocked-users" element={<SettingsPage />} />
+        <Route path="/farmer/:farmerId" element={<FarmerProfilePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {shouldShowNav && <BottomNav />}
