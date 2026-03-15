@@ -32,10 +32,10 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="fixed inset-0 bg-background flex flex-col overflow-hidden">
       <PageHeader title={thread.participantName} showBack />
 
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 pb-4">
         {thread.messages.map((msg) => {
           const isMe = msg.senderId === currentUser.id;
           return (
@@ -51,7 +51,7 @@ const ChatPage = () => {
         <div ref={bottomRef} />
       </div>
 
-      <div className="p-3 border-t border-border bg-card safe-bottom">
+      <div className="p-3 border-t border-border bg-card pb-[env(safe-area-inset-bottom,12px)]">
         <div className="flex gap-2">
           <input
             value={message}

@@ -1,9 +1,12 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft, Copy, Search, Printer, Phone, User } from "lucide-react";
+import { Package, MapPin, Truck, CheckCircle, Clock, XCircle, ArrowLeft, Copy, Printer, User } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { format } from "date-fns";
 import { toast } from "sonner";
+
+const DEFAULT_NAME = "John Farmer";
+const DEFAULT_ADDRESS = "123 Farm aroad, Kuala Lumpur";
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
@@ -28,10 +31,10 @@ const OrderDetailsPage = () => {
   const isCancelled = order.status === "cancelled";
 
   const handleBuyerCancel = () => {
-    // Deduct refund from seller wallet
-    setWalletBalance((b) => b - order.totalPrice);
+    // Fix 6: ADD back refund to buyer wallet (not deduct)
+    setWalletBalance((b) => b + order.totalPrice);
     setTransactions([
-      { id: `t${Date.now()}`, type: "refund" as const, amount: -order.totalPrice, description: `Refund: ${order.listing.name}`, timestamp: new Date() },
+      { id: `t${Date.now()}`, type: "refund" as const, amount: order.totalPrice, description: `Refund: ${order.listing.name}`, timestamp: new Date() },
       ...transactions,
     ]);
     setOrders(orders.map((o) =>
@@ -48,6 +51,10 @@ const OrderDetailsPage = () => {
     toast.info("Order cancelled. Refund processed.");
     navigate("/notifications");
   };
+
+  // Fix 8: When viewing from notification, use default buyer info
+  const displayName = fromNotification ? DEFAULT_NAME : (order.buyerName || DEFAULT_NAME);
+  const displayAddress = fromNotification ? DEFAULT_ADDRESS : (order.address || DEFAULT_ADDRESS);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -67,15 +74,17 @@ const OrderDetailsPage = () => {
           <h3 className="font-medium text-foreground text-sm">Delivery Information</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <User className="w-4 h-4 text-primary" />
-            <span>{order.listing.seller}</span>
+            <span>{displayName}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Phone className="w-4 h-4 text-primary" />
-            <span>+60198765432</span>
-          </div>
+          {order.listing.source && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span>{order.listing.source.location}</span>
+            </div>
+          )}
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 text-primary mt-0.5" />
-            <span>{order.address}</span>
+            <span>Delivery to: {displayAddress}</span>
           </div>
           {order.trackingNumber && (
             <div className="pt-2 border-t border-border">
@@ -88,10 +97,6 @@ const OrderDetailsPage = () => {
                   <button onClick={() => { navigator.clipboard.writeText(order.trackingNumber!); toast.success("Copied!"); }}
                     className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
                     <Copy className="w-3 h-3" /> Copy
-                  </button>
-                  <button onClick={() => toast.info("Tracking feature coming soon")}
-                    className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">
-                    <Search className="w-3 h-3" /> Track Package
                   </button>
                   <button onClick={() => navigate(`/print-label/${order.trackingNumber}`)}
                     className="py-1.5 px-3 rounded-lg border border-border text-foreground text-xs font-medium flex items-center gap-1">

@@ -9,7 +9,7 @@ const banks = ["Maybank", "CIMB Bank", "Public Bank", "RHB Bank", "Hong Leong Ba
 const RefundPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { orders, setOrders, walletBalance, setWalletBalance, transactions, setTransactions } = useApp();
+  const { orders, setOrders, setWalletBalance, transactions, setTransactions } = useApp();
   const order = orders.find((o) => o.id === id);
   const [selectedBank, setSelectedBank] = useState("");
 
@@ -25,19 +25,16 @@ const RefundPage = () => {
       toast.error("Please select a bank");
       return;
     }
-    if (walletBalance < order.totalPrice) {
-      toast.error("Insufficient wallet balance for refund");
-      return;
-    }
-    setWalletBalance((b) => b - order.totalPrice);
+    // Refund adds money back to buyer wallet
+    setWalletBalance((b) => b + order.totalPrice);
     setTransactions([
-      { id: `t${Date.now()}`, type: "refund" as const, amount: -order.totalPrice, description: `Refund: ${order.listing.name}`, timestamp: new Date() },
+      { id: `t${Date.now()}`, type: "refund" as const, amount: order.totalPrice, description: `Refund received: ${order.listing.name}`, timestamp: new Date() },
       ...transactions,
     ]);
     setOrders(orders.map((o) =>
       o.id === id ? { ...o, refundStatus: "processed" as const } : o
     ));
-    toast.success("Refund confirmed!");
+    toast.success("Refund confirmed! RM " + order.totalPrice.toFixed(2) + " added to wallet.");
     navigate("/notifications");
   };
 

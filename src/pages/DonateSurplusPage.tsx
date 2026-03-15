@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, Heart, Truck, Package, Copy, Printer, Map, Navigation, Minus, Plus } from "lucide-react";
+import { MapPin, Heart, Truck, Package, Copy, Printer, Navigation, Minus, Plus, CheckCircle2, Gift, Building2, Clock, Star, ArrowRight } from "lucide-react";
 import { useApp, generateTrackingNumber } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
 import { toast } from "sonner";
@@ -8,10 +8,10 @@ import { toast } from "sonner";
 type DonationStep = "select" | "kg" | "confirmed" | "method" | "dropoff" | "pickup";
 
 const foodMatchingOrgs = [
-  { id: "r1", name: "Shelter KL", needs: "Bread / Ready-to-eat food", distance: "2.1 km", icon: "🏠", lat: 3.1390, lng: 101.6869 },
-  { id: "r2", name: "Community Kitchen", needs: "Bread / Bakery items", distance: "3.4 km", icon: "🍲", lat: 3.1500, lng: 101.7100 },
-  { id: "r3", name: "Food Bank Malaysia", needs: "Vegetables & Fresh Crops", distance: "3.2 km", icon: "🏦", lat: 3.1300, lng: 101.6800 },
-  { id: "r4", name: "Green Plate Restaurant", needs: "Surplus produce for daily meals", distance: "2.8 km", icon: "🍽️", lat: 3.1450, lng: 101.6950 },
+  { id: "r1", name: "Shelter KL", needs: "Bread / Ready-to-eat food", distance: "2.1 km", icon: "🏠", lat: 3.1390, lng: 101.6869, rating: 4.8, category: "Shelter" },
+  { id: "r2", name: "Community Kitchen", needs: "Bread / Bakery items", distance: "3.4 km", icon: "🍲", lat: 3.1500, lng: 101.7100, rating: 4.6, category: "Food Kitchen" },
+  { id: "r3", name: "Food Bank Malaysia", needs: "Vegetables & Fresh Crops", distance: "3.2 km", icon: "🏦", lat: 3.1300, lng: 101.6800, rating: 4.9, category: "Food Bank" },
+  { id: "r4", name: "Green Plate Restaurant", needs: "Surplus produce for daily meals", distance: "2.8 km", icon: "🍽️", lat: 3.1450, lng: 101.6950, rating: 4.5, category: "Restaurant" },
 ];
 
 const getMatchingOrgs = (cropName: string) => {
@@ -60,7 +60,6 @@ const DonateSurplusPage = () => {
 
   const handleSelectMethod = (method: "pickup" | "dropoff") => {
     if (method === "dropoff") {
-      // Add notification with drop-off info
       setNotifications([
         {
           id: `n${Date.now()}`, type: "donation" as const, title: "Donation Confirmed",
@@ -74,7 +73,6 @@ const DonateSurplusPage = () => {
     } else {
       const trk = generateTrackingNumber();
       setTrackingNumber(trk);
-      // Add notification with tracking number
       setNotifications([
         {
           id: `n${Date.now()}`, type: "donation" as const, title: "Donation Confirmed",
@@ -101,44 +99,73 @@ const DonateSurplusPage = () => {
         {/* Step: Select recipient */}
         {step === "select" && (
           <>
-            <div className="bg-card rounded-xl overflow-hidden border border-border">
-              <div className="h-40 bg-primary-light flex items-center justify-center p-4">
-                <img src={listing.image} alt={listing.name} className="h-full object-contain" />
+            {/* Premium crop card */}
+            <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm">
+              <div className="h-44 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center p-4 relative">
+                <img src={listing.image} alt={listing.name} className="h-full object-contain drop-shadow-md" />
+                <div className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                  <Gift className="w-3 h-3" /> Surplus
+                </div>
               </div>
               <div className="p-4">
-                <h2 className="font-semibold text-foreground text-lg">{listing.name}</h2>
-                <p className="text-sm text-muted-foreground">Remaining Stock: {listing.stock} kg</p>
-                <p className="text-sm text-muted-foreground">Price: RM {listing.price.toFixed(2)}/kg</p>
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="font-bold text-foreground text-lg">{listing.name}</h2>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">RM {listing.price.toFixed(2)}/kg</span>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><Package className="w-3.5 h-3.5 text-primary" /> {listing.stock} kg available</span>
+                </div>
               </div>
             </div>
 
-            <div>
-              <h3 className="font-semibold text-foreground mb-1 flex items-center gap-2">
-                🤖 Best Matching Organizations
-              </h3>
-              <p className="text-xs text-muted-foreground mb-3">AI-matched based on your crop type and proximity</p>
-              <div className="space-y-3">
-                {matchingOrgs.map((r) => (
-                  <div key={r.id} className="bg-card rounded-xl p-4 border border-border">
+            {/* AI Matching header */}
+            <div className="flex items-center gap-2 px-1">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Star className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground text-sm">AI-Matched Organizations</h3>
+                <p className="text-xs text-muted-foreground">Best matches based on crop type & proximity</p>
+              </div>
+            </div>
+
+            {/* Organization cards */}
+            <div className="space-y-3">
+              {matchingOrgs.map((r) => (
+                <div key={r.id} className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+                  <div className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center text-2xl shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl shrink-0">
                         {r.icon}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm text-foreground">{r.name}</h4>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" /> {r.distance}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="font-semibold text-sm text-foreground">{r.name}</h4>
+                          <span className="text-[10px] bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full shrink-0">{r.category}</span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {r.distance}
+                          </p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" /> {r.rating}
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <Building2 className="w-3 h-3 text-primary shrink-0" />
+                          <span className="truncate">Needs: {r.needs}</span>
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Needs: {r.needs}</p>
                       </div>
                     </div>
+                  </div>
+                  <div className="px-4 pb-4">
                     <button onClick={() => handleDonate(r)}
-                      className="w-full mt-3 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">
-                      <Heart className="w-4 h-4" /> Donate
+                      className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-sm">
+                      <Heart className="w-4 h-4" /> Donate to {r.name}
                     </button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </>
         )}
@@ -146,38 +173,51 @@ const DonateSurplusPage = () => {
         {/* Step: Select KG */}
         {step === "kg" && (
           <div className="space-y-4">
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <h3 className="font-semibold text-foreground mb-1">Donating to {selectedOrg?.name}</h3>
-              <p className="text-xs text-muted-foreground">Select how many kg to donate</p>
+            {/* Status banner */}
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                <Heart className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Donating to {selectedOrg?.name}</p>
+                <p className="text-xs text-muted-foreground">{selectedOrg?.category} · {selectedOrg?.distance}</p>
+              </div>
             </div>
 
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <label className="text-sm font-medium text-foreground mb-3 block">Donation Amount (kg)</label>
-              <div className="flex items-center gap-4 mb-3">
-                <button onClick={() => setDonateKg(Math.max(1, donateKg - 1))} className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
+            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm">
+              <label className="text-sm font-semibold text-foreground mb-4 block">Select Donation Amount</label>
+              <div className="flex items-center justify-center gap-5 mb-4">
+                <button onClick={() => setDonateKg(Math.max(1, donateKg - 1))}
+                  className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 active:scale-95 transition-transform">
                   <Minus className="w-4 h-4 text-primary" />
                 </button>
-                <input
-                  type="number"
-                  value={donateKg}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value) || 1;
-                    setDonateKg(Math.max(1, Math.min(listing.stock, v)));
-                  }}
-                  className="w-20 text-center text-lg font-semibold bg-background border border-border rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  min={1}
-                  max={listing.stock}
-                />
-                <button onClick={() => setDonateKg(Math.min(listing.stock, donateKg + 1))} className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
+                <div className="text-center">
+                  <input
+                    type="number"
+                    value={donateKg}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value) || 1;
+                      setDonateKg(Math.max(1, Math.min(listing.stock, v)));
+                    }}
+                    className="w-24 text-center text-2xl font-bold bg-background border border-border rounded-xl py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    min={1}
+                    max={listing.stock}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">kilograms</p>
+                </div>
+                <button onClick={() => setDonateKg(Math.min(listing.stock, donateKg + 1))}
+                  className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 active:scale-95 transition-transform">
                   <Plus className="w-4 h-4 text-primary" />
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Available: {listing.stock} kg</p>
+              <div className="bg-muted/50 rounded-xl p-3 text-center">
+                <p className="text-xs text-muted-foreground">Available stock: <span className="font-semibold text-foreground">{listing.stock} kg</span></p>
+              </div>
             </div>
 
             <button onClick={handleConfirmDonate}
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
-              Confirm Donation ({donateKg} kg)
+              className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-sm">
+              <CheckCircle2 className="w-4 h-4" /> Confirm Donation ({donateKg} kg)
             </button>
           </div>
         )}
@@ -185,37 +225,56 @@ const DonateSurplusPage = () => {
         {/* Donation Confirmed - show amount and method selection */}
         {step === "confirmed" && (
           <div className="space-y-4">
-            <div className="bg-accent/30 rounded-xl p-6 text-center">
-              <p className="text-3xl mb-2">✅</p>
-              <h3 className="font-semibold text-foreground text-lg">Donation Confirmed</h3>
+            {/* Success banner */}
+            <div className="bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 rounded-2xl p-6 text-center shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="font-bold text-foreground text-lg">Donation Confirmed!</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                You donated <span className="font-bold text-foreground">{donatedAmount} kg</span> of {listing.name}
+                <span className="font-bold text-foreground">{donatedAmount} kg</span> of {listing.name}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">to {selectedOrg?.name}</p>
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">
+                <Building2 className="w-3 h-3" /> {selectedOrg?.name}
+              </div>
             </div>
 
+            {/* Delivery method */}
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Select Delivery Method</h3>
+              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Truck className="w-4 h-4 text-primary" /> Choose Delivery Method
+              </h3>
               <div className="space-y-3">
                 <button onClick={() => handleSelectMethod("pickup")}
-                  className="w-full bg-card rounded-xl p-4 border border-border flex items-center gap-3 text-left">
-                  <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center">
+                  className="w-full bg-card rounded-2xl p-4 border border-border shadow-sm flex items-center gap-4 text-left active:scale-[0.99] transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Truck className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <h4 className="font-medium text-sm text-foreground">Delivery Pick Up</h4>
-                    <p className="text-xs text-muted-foreground">Courier will come pick up your donation</p>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm text-foreground">Delivery Pick Up</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Courier will come pick up your donation</p>
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <Clock className="w-3 h-3 text-primary" />
+                      <span className="text-[10px] text-primary font-medium">Within 2 business days</span>
+                    </div>
                   </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
                 </button>
+
                 <button onClick={() => handleSelectMethod("dropoff")}
-                  className="w-full bg-card rounded-xl p-4 border border-border flex items-center gap-3 text-left">
-                  <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center">
+                  className="w-full bg-card rounded-2xl p-4 border border-border shadow-sm flex items-center gap-4 text-left active:scale-[0.99] transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Package className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <h4 className="font-medium text-sm text-foreground">Drop Off at Location</h4>
-                    <p className="text-xs text-muted-foreground">Deliver your donation to the organization</p>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm text-foreground">Drop Off at Location</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Deliver your donation to the organization</p>
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <MapPin className="w-3 h-3 text-primary" />
+                      <span className="text-[10px] text-primary font-medium">Bangsar, Kuala Lumpur</span>
+                    </div>
                   </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
                 </button>
               </div>
             </div>
@@ -225,27 +284,48 @@ const DonateSurplusPage = () => {
         {/* Drop Off */}
         {step === "dropoff" && (
           <div className="space-y-4">
-            <div className="bg-accent/30 rounded-xl p-5 text-center">
-              <p className="text-2xl mb-2">📍</p>
-              <p className="text-sm font-semibold text-foreground">Please drop off your donation at:</p>
-              <p className="text-sm text-muted-foreground mt-2">{donationAddress}</p>
-              <p className="text-xs text-muted-foreground mt-1">Within 2 days.</p>
+            {/* Status banner */}
+            <div className="bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground text-sm">Drop-Off Scheduled</p>
+                  <p className="text-xs text-muted-foreground">Please deliver within 2 days</p>
+                </div>
+              </div>
+              <div className="bg-white/50 dark:bg-black/10 rounded-xl p-3 border border-primary/10">
+                <p className="text-xs font-semibold text-foreground mb-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-primary" /> Drop-Off Address
+                </p>
+                <p className="text-sm text-foreground font-medium">{donationAddress}</p>
+              </div>
             </div>
 
             {/* Distance & arrival estimate */}
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-sm text-muted-foreground">Distance: <span className="font-medium text-foreground">4.5 km</span></p>
-              <p className="text-sm text-muted-foreground">Estimated arrival: <span className="font-medium text-foreground">10 minutes</span></p>
+            <div className="bg-card rounded-2xl p-4 border border-border shadow-sm">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Route Information</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-muted/50 rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-foreground">4.5 km</p>
+                  <p className="text-[10px] text-muted-foreground">Distance</p>
+                </div>
+                <div className="bg-muted/50 rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-foreground">~10 min</p>
+                  <p className="text-[10px] text-muted-foreground">Est. Arrival</p>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-3">
               <button onClick={() => openGoogleMaps()}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">
-                <Map className="w-4 h-4" /> Open Map
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-sm">
+                <MapPin className="w-4 h-4" /> Open Maps
               </button>
               <button onClick={() => openGoogleMaps()}
                 className="flex-1 py-3 rounded-xl border border-primary text-primary font-semibold text-sm flex items-center justify-center gap-2">
-                <Navigation className="w-4 h-4" /> View Directions
+                <Navigation className="w-4 h-4" /> Directions
               </button>
             </div>
             <button onClick={() => navigate("/my-listings")} className="w-full py-3 rounded-xl border border-border text-foreground font-medium text-sm">
@@ -257,24 +337,36 @@ const DonateSurplusPage = () => {
         {/* Delivery Pick Up */}
         {step === "pickup" && (
           <div className="space-y-4">
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-xs font-semibold text-foreground mb-2">Tracking Number</p>
-              <p className="text-lg font-bold text-primary mb-3">{trackingNumber}</p>
-              <div className="flex gap-2">
-                <button onClick={() => { navigator.clipboard.writeText(trackingNumber); toast.success("Copied!"); }}
-                  className="flex-1 py-2 rounded-lg border border-border text-foreground text-xs font-medium flex items-center justify-center gap-1.5">
-                  <Copy className="w-3.5 h-3.5" /> Copy
-                </button>
-                <button onClick={() => navigate(`/print-label/${trackingNumber}`)}
-                  className="flex-1 py-2 rounded-lg border border-border text-foreground text-xs font-medium flex items-center justify-center gap-1.5">
-                  <Printer className="w-3.5 h-3.5" /> Print Label
-                </button>
+            {/* Status banner */}
+            <div className="bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground text-sm">Pick-Up Scheduled</p>
+                  <p className="text-xs text-muted-foreground">Courier arrives within 2 business days</p>
+                </div>
+              </div>
+              <div className="bg-white/50 dark:bg-black/10 rounded-xl p-3 border border-primary/10">
+                <p className="text-xs font-semibold text-muted-foreground mb-1">Tracking Number</p>
+                <p className="text-lg font-bold text-primary tracking-wide">{trackingNumber}</p>
               </div>
             </div>
 
-            <div className="bg-accent/30 rounded-xl p-5 text-center">
-              <p className="text-2xl mb-2">📦</p>
-              <p className="text-sm font-semibold text-foreground">Courier will pick up within 2 days</p>
+            {/* Action buttons */}
+            <div className="bg-card rounded-2xl p-4 border border-border shadow-sm">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Actions</p>
+              <div className="flex gap-2">
+                <button onClick={() => { navigator.clipboard.writeText(trackingNumber); toast.success("Copied!"); }}
+                  className="flex-1 py-2.5 rounded-xl border border-border text-foreground text-xs font-semibold flex items-center justify-center gap-1.5 bg-muted/30">
+                  <Copy className="w-3.5 h-3.5" /> Copy Number
+                </button>
+                <button onClick={() => navigate(`/print-label/${trackingNumber}`)}
+                  className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+                  <Printer className="w-3.5 h-3.5" /> Print Shipping Label
+                </button>
+              </div>
             </div>
 
             <button onClick={() => navigate("/my-listings")} className="w-full py-3 rounded-xl border border-border text-foreground font-medium text-sm">
@@ -284,19 +376,25 @@ const DonateSurplusPage = () => {
         )}
       </div>
 
-      {/* Confirmation Modal - now proceeds to KG step */}
+      {/* Confirmation Modal */}
       {selectedOrg && step === "select" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
-          <div className="bg-card rounded-2xl p-6 w-full max-w-sm border border-border">
-            <h3 className="font-semibold text-foreground text-center mb-2">Confirm Surplus Donation</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
+          <div className="bg-card rounded-2xl p-6 w-full max-w-sm border border-border shadow-xl">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Heart className="w-7 h-7 text-primary" />
+            </div>
+            <h3 className="font-bold text-foreground text-center text-base mb-1">Confirm Donation</h3>
             <p className="text-sm text-muted-foreground text-center mb-5">
-              Are you sure you want to donate your surplus <span className="font-medium text-foreground">{listing.name}</span> to <span className="font-medium text-foreground">{selectedOrg.name}</span>?
+              Donate surplus <span className="font-semibold text-foreground">{listing.name}</span> to{" "}
+              <span className="font-semibold text-foreground">{selectedOrg.name}</span>?
             </p>
             <div className="flex gap-3">
               <button onClick={() => setSelectedOrg(null)}
                 className="flex-1 py-2.5 rounded-xl border border-border text-foreground font-medium text-sm">Cancel</button>
               <button onClick={handleProceedToKg}
-                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">Next</button>
+                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-1.5">
+                Next <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>

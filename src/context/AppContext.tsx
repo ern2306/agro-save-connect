@@ -57,7 +57,7 @@ export interface ChatThread {
 
 export interface Notification {
   id: string;
-  type: "order_shipped" | "order_confirmed" | "order_cancelled" | "new_order" | "order_cancelled_seller" | "order_preparing" | "donation";
+  type: "order_shipped" | "order_confirmed" | "order_cancelled" | "new_order" | "order_cancelled_seller" | "order_preparing" | "donation" | "block_impact";
   title: string;
   message: string;
   orderId: string;
@@ -67,10 +67,12 @@ export interface Notification {
 
 export interface Transaction {
   id: string;
-  type: "topup" | "purchase" | "transfer" | "refund" | "sale";
+  type: "topup" | "purchase" | "transfer" | "refund" | "sale" | "withdrawal";
   amount: number;
   description: string;
   timestamp: Date;
+  accountNumber?: string;
+  recipientAccount?: string;
 }
 
 export interface UserProfile {
@@ -80,6 +82,7 @@ export interface UserProfile {
   email: string;
   avatar: string;
   address?: string;
+  accountNumber?: string;
 }
 
 export interface ScanRecord {
@@ -116,6 +119,8 @@ interface AppState {
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
   scanHistory: ScanRecord[];
   setScanHistory: React.Dispatch<React.SetStateAction<ScanRecord[]>>;
+  blockedUsers: string[];
+  setBlockedUsers: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -152,29 +157,29 @@ const defaultListings: Listing[] = [
 ];
 
 const defaultNotifications: Notification[] = [
-  { id: "n1", type: "order_confirmed", title: "Order Confirmed", message: "Your order #1001 has been confirmed. Seller: Farmer Ali, Phone: +60198765432, Address: Serdang, Selangor. Tracking: TRK928347123", orderId: "o1", timestamp: new Date(Date.now() - 3600000), read: false },
-  { id: "n2", type: "order_shipped", title: "Order Shipped", message: "Your order #1002 has been shipped. Seller: Farmer Siti, Phone: +60187654321, Address: Cameron Highlands, Pahang. Tracking: MY123456789", orderId: "o2", timestamp: new Date(Date.now() - 7200000), read: false },
-  { id: "n3", type: "new_order", title: "New Order", message: "You received a new order for Potato", orderId: "o3", timestamp: new Date(Date.now() - 1800000), read: false },
+  { id: "n1", type: "order_confirmed", title: "Order Confirmed", message: "Your order #1001 has been confirmed. Click to see details.", orderId: "o1", timestamp: new Date(Date.now() - 3600000), read: false },
+  { id: "n2", type: "order_shipped", title: "Order Shipped", message: "Your order #1002 has been shipped. Click to see details.", orderId: "o2", timestamp: new Date(Date.now() - 7200000), read: false },
+  { id: "n3", type: "new_order", title: "New Order", message: "You received a new order for Potato. Click to see details.", orderId: "o3", timestamp: new Date(Date.now() - 1800000), read: false },
 ];
 
 const defaultOrders: Order[] = [
   {
     id: "o1", listing: defaultListings[0], quantity: 5, totalPrice: 17.5,
     status: "confirmed", buyerId: "user1", sellerId: "seller1",
-    createdAt: new Date(Date.now() - 86400000), address: "123 Farm Road, Kuala Lumpur",
+    createdAt: new Date(Date.now() - 86400000), address: "123 Farm aroad, Kuala Lumpur",
     buyerName: "John Farmer", buyerPhone: "+60123456789",
   },
   {
     id: "o2", listing: defaultListings[1], quantity: 3, totalPrice: 15.0,
     status: "shipped", buyerId: "user1", sellerId: "seller2", trackingNumber: "MY123456789",
-    createdAt: new Date(Date.now() - 172800000), address: "456 Green Street, Penang",
+    createdAt: new Date(Date.now() - 172800000), address: "123 Farm aroad, Kuala Lumpur",
     buyerName: "John Farmer", buyerPhone: "+60123456789",
   },
   {
     id: "o3", listing: defaultListings[0], quantity: 10, totalPrice: 35.0,
     status: "pending", buyerId: "buyer1", sellerId: "user1",
-    createdAt: new Date(Date.now() - 900000), address: "789 Market Ave, Johor",
-    buyerName: "Ahmad", buyerPhone: "+60176543210",
+    createdAt: new Date(Date.now() - 900000), address: "123 Farm aroad, Kuala Lumpur",
+    buyerName: "John Farmer", buyerPhone: "+60123456789",
   },
 ];
 
@@ -199,6 +204,14 @@ const defaultChatThreads: ChatThread[] = [
 
 const defaultScanHistory: ScanRecord[] = [
   {
+    id: "scan3", plantName: "Broccoli", result: "Healthy",
+    timestamp: new Date(Date.now() - 43200000),
+  },
+  {
+    id: "scan4", plantName: "Cabbage", result: "Healthy",
+    timestamp: new Date(Date.now() - 64800000),
+  },
+  {
     id: "scan1", plantName: "Chili Plant", result: "Pest Detected",
     timestamp: new Date(Date.now() - 86400000),
     treatment: {
@@ -221,7 +234,8 @@ const defaultScanHistory: ScanRecord[] = [
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile>({
     id: "user1", username: "John Farmer", phone: "+60123456789",
-    email: "john@agrosave.com", avatar: "👨‍🌾", address: "123 Farm Road, Kuala Lumpur",
+    email: "john@agrosave.com", avatar: "👨‍🌾", address: "123 Farm aroad, Kuala Lumpur",
+    accountNumber: "AGS3847291056",
   });
   const [walletBalance, setWalletBalance] = useState(5560.0);
   const [listings, setListings] = useState<Listing[]>(defaultListings);
@@ -229,18 +243,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>(defaultNotifications);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>(defaultChatThreads);
   const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: "t1", type: "topup", amount: 500, description: "Top Up", timestamp: new Date(Date.now() - 86400000 * 3) },
+    { id: "t1", type: "topup", amount: 500, description: "Top Up via Maybank", timestamp: new Date(Date.now() - 86400000 * 3), accountNumber: "1234567890" },
     { id: "t2", type: "purchase", amount: -17.5, description: "Purchase: Potato", timestamp: new Date(Date.now() - 86400000) },
     { id: "t3", type: "sale", amount: 35.0, description: "Sale: Potato x10", timestamp: new Date(Date.now() - 3600000) },
+    { id: "t4", type: "transfer", amount: -50, description: "Transfer to Ahmad", timestamp: new Date(Date.now() - 172800000), recipientAccount: "AGS1234567890" },
+    { id: "t5", type: "withdrawal", amount: -200, description: "Withdraw to CIMB Bank", timestamp: new Date(Date.now() - 259200000) },
+    { id: "t6", type: "refund", amount: 25, description: "Refund: Cancelled Order", timestamp: new Date(Date.now() - 345600000) },
   ]);
   const [scanHistory, setScanHistory] = useState<ScanRecord[]>(defaultScanHistory);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
   return (
     <AppContext.Provider value={{
       currentUser, setCurrentUser, walletBalance, setWalletBalance,
       listings, setListings, orders, setOrders, notifications, setNotifications,
       chatThreads, setChatThreads, transactions, setTransactions,
-      scanHistory, setScanHistory,
+      scanHistory, setScanHistory, blockedUsers, setBlockedUsers,
     }}>
       {children}
     </AppContext.Provider>
