@@ -16,6 +16,7 @@ import {
   Clock,
   Star,
   ArrowRight,
+  ChevronRight,
 } from "lucide-react";
 import { useApp, generateTrackingNumber } from "@/context/AppContext";
 import PageHeader from "@/components/PageHeader";
@@ -296,209 +297,161 @@ const DonateSurplusPage = () => {
                   Donating to {selectedOrg?.name}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {selectedOrg?.category} · {selectedOrg?.distance}
+                  Specify the amount you want to donate
                 </p>
               </div>
             </div>
 
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm">
-              <label className="text-sm font-semibold text-foreground mb-4 block">
-                Select Donation Amount
-              </label>
-              <div className="flex items-center justify-center gap-5 mb-4">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm text-center">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
+                Donation Amount
+              </p>
+              <div className="flex items-center justify-center gap-8 mb-6">
                 <button
                   onClick={() => setDonateKg(Math.max(1, donateKg - 1))}
-                  className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 active:scale-95 transition-transform"
+                  className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-foreground active:scale-90 transition-transform"
                 >
-                  <Minus className="w-4 h-4 text-primary" />
+                  <Minus className="w-6 h-6" />
                 </button>
-                <div className="text-center">
-                  <input
-                    type="number"
-                    value={donateKg}
-                    onChange={(e) => {
-                      const v = parseInt(e.target.value) || 1;
-                      setDonateKg(Math.max(1, Math.min(listing.stock, v)));
-                    }}
-                    className="w-24 text-center text-2xl font-bold bg-background border border-border rounded-xl py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    min={1}
-                    max={listing.stock}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    kilograms
-                  </p>
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl font-black text-foreground">
+                    {donateKg}
+                  </span>
+                  <span className="text-xs font-bold text-muted-foreground uppercase">
+                    Kilograms
+                  </span>
                 </div>
                 <button
                   onClick={() =>
                     setDonateKg(Math.min(listing.stock, donateKg + 1))
                   }
-                  className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 active:scale-95 transition-transform"
+                  className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-foreground active:scale-90 transition-transform"
                 >
-                  <Plus className="w-4 h-4 text-primary" />
+                  <Plus className="w-6 h-6" />
                 </button>
               </div>
-              <div className="bg-muted/50 rounded-xl p-3 text-center">
-                <p className="text-xs text-muted-foreground">
-                  Available stock:{" "}
-                  <span className="font-semibold text-foreground">
-                    {listing.stock} kg
-                  </span>
-                </p>
+              <div className="flex justify-between text-xs text-muted-foreground mb-6 px-2">
+                <span>Min: 1kg</span>
+                <span>Max: {listing.stock}kg</span>
               </div>
+              <button
+                onClick={handleConfirmDonate}
+                className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 active:scale-[0.98] transition-all"
+              >
+                Confirm {donateKg}kg Donation
+              </button>
             </div>
-
-            <button
-              onClick={handleConfirmDonate}
-              className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-sm"
-            >
-              <CheckCircle2 className="w-4 h-4" /> Confirm Donation ({donateKg}{" "}
-              kg)
-            </button>
           </div>
         )}
 
-        {/* Donation Confirmed - show amount and method selection */}
+        {/* Step: Confirmed */}
         {step === "confirmed" && (
           <div className="space-y-4">
-            {/* Success banner */}
-            <div className="bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 rounded-2xl p-6 text-center shadow-sm">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">
-                <CheckCircle2 className="w-8 h-8 text-primary" />
+            <div className="bg-card rounded-3xl p-8 border border-border shadow-sm text-center">
+              <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="w-10 h-10 text-emerald-500" />
               </div>
-              <h3 className="font-bold text-foreground text-lg">
-                Donation Confirmed!
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h2 className="text-2xl font-black text-foreground mb-2">
+                Donation Confirmed
+              </h2>
+              <p className="text-sm text-muted-foreground mb-8">
+                You have successfully donated{" "}
                 <span className="font-bold text-foreground">
-                  {donatedAmount} kg
+                  {donatedAmount}kg
                 </span>{" "}
-                of {listing.name}
+                of {listing.name} to {selectedOrg?.name}.
               </p>
-              <div className="mt-2 inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">
-                <Building2 className="w-3 h-3" /> {selectedOrg?.name}
-              </div>
-            </div>
-
-            {/* Delivery method */}
-            <div>
-              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                <Truck className="w-4 h-4 text-primary" /> Choose Delivery
-                Method
-              </h3>
               <div className="space-y-3">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Choose Delivery Method
+                </p>
                 <button
                   onClick={() => handleSelectMethod("pickup")}
-                  className="w-full bg-card rounded-2xl p-4 border border-border shadow-sm flex items-center gap-4 text-left active:scale-[0.99] transition-transform"
+                  className="w-full p-4 rounded-2xl border border-border flex items-center gap-4 hover:border-primary hover:bg-primary/5 transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Truck className="w-5 h-5 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Truck className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-foreground">
-                      Delivery Pick Up
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Courier will come pick up your donation
+                  <div className="text-left">
+                    <p className="font-bold text-sm">Courier Pick-up</p>
+                    <p className="text-xs text-muted-foreground">
+                      We'll send a courier to your farm
                     </p>
-                    <div className="flex items-center gap-1 mt-1.5">
-                      <Clock className="w-3 h-3 text-primary" />
-                      <span className="text-[10px] text-primary font-medium">
-                        Within 2 business days
-                      </span>
-                    </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <ChevronRight className="w-5 h-5 ml-auto text-muted-foreground" />
                 </button>
-
                 <button
                   onClick={() => handleSelectMethod("dropoff")}
-                  className="w-full bg-card rounded-2xl p-4 border border-border shadow-sm flex items-center gap-4 text-left active:scale-[0.99] transition-transform"
+                  className="w-full p-4 rounded-2xl border border-border flex items-center gap-4 hover:border-primary hover:bg-primary/5 transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Package className="w-5 h-5 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Package className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-foreground">
-                      Drop Off at Location
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Deliver your donation to the organization
+                  <div className="text-left">
+                    <p className="font-bold text-sm">Self Drop-off</p>
+                    <p className="text-xs text-muted-foreground">
+                      Deliver to the organization yourself
                     </p>
-                    <div className="flex items-center gap-1 mt-1.5">
-                      <MapPin className="w-3 h-3 text-primary" />
-                      <span className="text-[10px] text-primary font-medium">
-                        Bangsar, Kuala Lumpur
-                      </span>
-                    </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <ChevronRight className="w-5 h-5 ml-auto text-muted-foreground" />
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Drop Off */}
+        {/* Delivery Drop Off */}
         {step === "dropoff" && (
           <div className="space-y-4">
             {/* Status banner */}
             <div className="bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/20 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <Package className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <p className="font-bold text-foreground text-sm">
-                    Drop-Off Scheduled
+                    Drop-off Required
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Please deliver within 2 days
+                    Please deliver within 2 business days
                   </p>
                 </div>
               </div>
-              <div className="bg-white/50 dark:bg-black/10 rounded-xl p-3 border border-primary/10">
-                <p className="text-xs font-semibold text-foreground mb-1 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-primary" /> Drop-Off
-                  Address
-                </p>
-                <p className="text-sm text-foreground font-medium">
-                  {donationAddress}
-                </p>
+              <div className="bg-white/50 dark:bg-black/10 rounded-xl p-4 border border-primary/10">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-foreground leading-tight">
+                      {donationAddress}
+                    </p>
+                    <button
+                      onClick={() => openGoogleMaps()}
+                      className="text-[10px] font-bold text-primary uppercase tracking-wider mt-2 flex items-center gap-1"
+                    >
+                      <Navigation className="w-3 h-3" /> Get Directions
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Distance & arrival estimate */}
+            {/* Recipient info */}
             <div className="bg-card rounded-2xl p-4 border border-border shadow-sm">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                Route Information
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-lg font-bold text-foreground">4.5 km</p>
-                  <p className="text-[10px] text-muted-foreground">Distance</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                Recipient Organization
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-xl">
+                  {selectedOrg?.icon}
                 </div>
-                <div className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-lg font-bold text-foreground">~10 min</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Est. Arrival
+                <div>
+                  <p className="font-bold text-sm">{selectedOrg?.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedOrg?.category}
                   </p>
                 </div>
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => openGoogleMaps()}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-sm"
-              >
-                <MapPin className="w-4 h-4" /> Open Maps
-              </button>
-              <button
-                onClick={() => openGoogleMaps()}
-                className="flex-1 py-3 rounded-xl border border-primary text-primary font-semibold text-sm flex items-center justify-center gap-2"
-              >
-                <Navigation className="w-4 h-4" /> Directions
-              </button>
             </div>
             <button
               onClick={() => navigate("/my-listings")}

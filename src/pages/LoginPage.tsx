@@ -24,14 +24,26 @@ const LoginPage = () => {
       navigate("/explore");
     }
   }, [navigate]);
+
   const [isLogin, setIsLogin] = useState(true);
 
   // Form states
-  const [username, setUsername] = useState("farmerjohn");
-  const [password, setPassword] = useState("123456");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+
+  // Set default credentials for easier testing in login mode
+  useEffect(() => {
+    if (isLogin) {
+      setUsername("farmerjohn");
+      setPassword("123456");
+    } else {
+      setUsername("");
+      setPassword("");
+    }
+  }, [isLogin]);
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();

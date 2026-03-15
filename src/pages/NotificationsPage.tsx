@@ -26,6 +26,7 @@ const NotificationsPage = () => {
       "order_confirmed",
       "order_cancelled",
       "donation",
+      "blocked",
     ].includes(n.type)
   );
 
@@ -37,8 +38,12 @@ const NotificationsPage = () => {
     ) {
       return false;
     }
-    const order = orders.find((o) => o.id === n.orderId);
-    if (!order || order.buyerId === currentUser.id) return false;
+    // Safe access to orderId
+    const orderId = (n as any).orderId;
+    if (!orderId) return false;
+
+    const order = orders.find((o) => o.id === orderId);
+    if (!order || order.buyerId === currentUser?.id) return false;
     const cropName = order.listing.name.toLowerCase();
     return ALLOWED_SELLER_CROPS.some((crop) => cropName.includes(crop));
   });
@@ -90,6 +95,13 @@ const NotificationsPage = () => {
           color: "text-rose-500 dark:text-rose-400",
           label: "Donation",
         };
+      case "blocked":
+        return {
+          icon: XCircle,
+          bg: "bg-red-50 dark:bg-red-950/30",
+          color: "text-red-500 dark:text-red-400",
+          label: "Blocked",
+        };
       default:
         return {
           icon: Bell,
@@ -100,7 +112,7 @@ const NotificationsPage = () => {
     }
   };
 
-  const handleClick = (n: (typeof notifications)[0]) => {
+  const handleClick = (n: any) => {
     if (n.type === "donation") {
       const mockDonationData = {
         id: n.id,
@@ -121,12 +133,18 @@ const NotificationsPage = () => {
       navigate(`/donation-details/${n.id}`, { state: mockDonationData });
       return;
     }
-    if (n.type === "new_order") navigate(`/new-order/${n.orderId}`);
-    else if (n.type === "order_cancelled_seller")
+
+    if (n.type === "blocked") return;
+
+    if (n.type === "new_order" && n.orderId) {
+      navigate(`/new-order/${n.orderId}`);
+    } else if (n.type === "order_cancelled_seller" && n.orderId) {
       navigate(`/refund/${n.orderId}`);
-    else if (n.type === "order_preparing")
+    } else if (n.type === "order_preparing" && n.orderId) {
       navigate(`/order-details/${n.orderId}?from=seller`);
-    else navigate(`/order-details/${n.orderId}?from=notification`);
+    } else if (n.orderId) {
+      navigate(`/order-details/${n.orderId}?from=notification`);
+    }
   };
 
   return (
@@ -214,7 +232,9 @@ const NotificationsPage = () => {
                       {cfg.label}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(n.timestamp, { addSuffix: true })}
+                      {formatDistanceToNow(new Date(n.timestamp), {
+                        addSuffix: true,
+                      })}
                     </span>
                   </div>
                 </div>

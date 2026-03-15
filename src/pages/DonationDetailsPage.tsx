@@ -51,12 +51,8 @@ const DonationDetailsPage = () => {
             <CheckCircle2 className="w-8 h-8 text-primary" />
           </div>
           <h3 className="font-bold text-foreground text-lg">
-            Donation Successful
+            Donation Confirmed
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            You have donated{" "}
-            <span className="font-bold text-foreground">{kg} kg</span> of {crop}
-          </p>
         </div>
 
         {/* Donation Info Card */}

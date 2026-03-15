@@ -10,9 +10,11 @@ import {
   HelpCircle,
   Info,
   Globe,
+  Copy,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Language } from "@/lib/i18n";
+import { toast } from "sonner";
 
 const MePage = () => {
   const navigate = useNavigate();
@@ -26,6 +28,22 @@ const MePage = () => {
   } = useApp();
 
   if (!currentUser) return null;
+
+  // Mock account number for display
+  const accountNumber = "1234-5678-9012-3456";
+
+  const handleCopyAccount = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(accountNumber);
+    toast.success("Account number copied!");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("agro_user");
+    setCurrentUser(null);
+    toast.info("Logged out");
+    navigate("/login"); // Redirect to login page
+  };
 
   const menuItems = [
     { icon: User, label: t("profile"), path: "/profile" },
@@ -64,9 +82,21 @@ const MePage = () => {
               {currentUser.username}
             </h1>
             <p className="text-white/70 text-sm">{currentUser.email}</p>
+
+            {/* Account Number Section */}
+            <div
+              onClick={handleCopyAccount}
+              className="mt-1 flex items-center gap-1.5 text-white/60 hover:text-white transition-colors cursor-pointer group"
+            >
+              <p className="text-[10px] font-mono tracking-wider">
+                ACC: {accountNumber}
+              </p>
+              <Copy className="w-3 h-3 group-active:scale-90 transition-transform" />
+            </div>
+
             <button
               onClick={() => navigate("/profile")}
-              className="mt-2 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors border border-white/10"
+              className="mt-3 px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors border border-white/10"
             >
               {t("edit_profile")}
             </button>
@@ -170,11 +200,7 @@ const MePage = () => {
 
         {/* Logout */}
         <button
-          onClick={() => {
-            localStorage.removeItem("agro_user");
-            setCurrentUser(null);
-            navigate("/login");
-          }}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 p-4 bg-red-500/5 hover:bg-red-500/10 rounded-3xl border border-red-500/10 text-red-500 transition-colors mb-6"
         >
           <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">

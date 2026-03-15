@@ -19,8 +19,18 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
-    toast.info("Logged out");
-    navigate("/");
+    setCurrentUser({
+      id: "",
+      username: "",
+      email: "",
+      phone: "",
+      address: "",
+      avatar: "",
+      accountNumber: "",
+    });
+    localStorage.removeItem("agrosave_user");
+    toast.success("Logged out successfully!");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -34,31 +44,59 @@ const ProfilePage = () => {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-foreground mb-1 block">Username</label>
-          <input value={username} onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <label className="text-sm font-medium text-foreground mb-1 block">
+            Username
+          </label>
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
         <div>
-          <label className="text-sm font-medium text-foreground mb-1 block">Phone</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <label className="text-sm font-medium text-foreground mb-1 block">
+            Phone
+          </label>
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
         <div>
-          <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <label className="text-sm font-medium text-foreground mb-1 block">
+            Email
+          </label>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
         <div>
-          <label className="text-sm font-medium text-foreground mb-1 block">Address (Default Shipping)</label>
-          <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} placeholder="Enter your default shipping address"
-            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+          <label className="text-sm font-medium text-foreground mb-1 block">
+            Address (Default Shipping)
+          </label>
+          <textarea
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            rows={2}
+            placeholder="Enter your default shipping address"
+            className="w-full px-4 py-2.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+          />
         </div>
 
-        <button onClick={handleSave} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+        <button
+          onClick={handleSave}
+          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm"
+        >
           Save Changes
         </button>
 
-        <button onClick={handleLogout} className="w-full py-3 rounded-xl border border-destructive text-destructive font-semibold text-sm flex items-center justify-center gap-2 mt-4">
+        <button
+          onClick={handleLogout}
+          className="w-full py-3 rounded-xl border border-destructive text-destructive font-semibold text-sm flex items-center justify-center gap-2 mt-4"
+        >
           <LogOut className="w-4 h-4" />
           Log Out
         </button>

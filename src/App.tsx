@@ -36,6 +36,7 @@ import HelpCenterPage from "@/pages/HelpCenterPage";
 import AboutUsPage from "@/pages/AboutUsPage";
 import FarmerProfilePage from "@/pages/FarmerProfilePage";
 import NotFound from "@/pages/NotFound";
+import AIChatWidget from "@/components/AIChatWidget";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,7 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       {shouldShowNav && <BottomNav />}
+      <AIChatWidget />
     </div>
   );
 };

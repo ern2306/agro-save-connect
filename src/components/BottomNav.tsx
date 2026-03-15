@@ -12,15 +12,6 @@ const BottomNav = () => {
     { path: "/pest-detect", icon: Bug, label: t("pest_detect") },
     { path: "/add-listing", icon: PlusCircle, label: t("sell") },
     { path: "/notifications", icon: Bell, label: t("notifications") },
-    { path: "/me", icon: t("me"), label: t("me") }, // Fix: the icon field was being used for label in some places, but let's keep it consistent
-  ];
-
-  // Adjusting the tabs array to correctly use icons
-  const correctedTabs = [
-    { path: "/explore", icon: Search, label: t("explore") },
-    { path: "/pest-detect", icon: Bug, label: t("pest_detect") },
-    { path: "/add-listing", icon: PlusCircle, label: t("sell") },
-    { path: "/notifications", icon: Bell, label: t("notifications") },
     { path: "/me", icon: User, label: t("me") },
   ];
 
@@ -31,7 +22,7 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-bottom">
       <div className="max-w-md mx-auto flex items-center justify-around py-2">
-        {correctedTabs.map((tab) => {
+        {tabs.map((tab) => {
           const isActive = location.pathname.startsWith(tab.path);
           const Icon = tab.icon;
           const isAdd = tab.path === "/add-listing";

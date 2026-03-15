@@ -36,7 +36,7 @@ const WalletPage = () => {
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [amount, setAmount] = useState("");
-  const [transferTo, setTransferTo] = useState("");
+  const [transferTo, setTransferTo] = useState(""); // This will now be the account number
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [withdrawBank, setWithdrawBank] = useState("");
   const [withdrawAccount, setWithdrawAccount] = useState("");
@@ -51,6 +51,7 @@ const WalletPage = () => {
     setSelectedPreset(null);
     setTopUpBank("");
     setTopUpAccount("");
+    setTransferTo(""); // Clear transferTo as well
   };
 
   const handlePresetSelect = (val: number) => {
@@ -94,7 +95,7 @@ const WalletPage = () => {
       return;
     }
     if (!transferTo.trim()) {
-      toast.error("Enter recipient");
+      toast.error("Please enter recipient's account number"); // Updated error message
       return;
     }
     if (walletBalance < val) {
@@ -107,7 +108,7 @@ const WalletPage = () => {
         id: `t${Date.now()}`,
         type: "transfer",
         amount: -val,
-        description: `Transfer to ${transferTo}`,
+        description: `Transfer to account ****${transferTo.slice(-4)}`, // Updated description
         timestamp: new Date(),
       },
       ...transactions,
@@ -268,21 +269,6 @@ const WalletPage = () => {
                     </option>
                   ))}
                 </select>
-                <div className="grid grid-cols-3 gap-2">
-                  {presetAmounts.map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => handlePresetSelect(p)}
-                      className={`py-3 rounded-xl text-xs font-black border-2 transition-all ${
-                        selectedPreset === p
-                          ? "bg-primary border-primary text-white"
-                          : "bg-background border-border text-muted-foreground"
-                      }`}
-                    >
-                      RM {p}
-                    </button>
-                  ))}
-                </div>
                 <input
                   value={amount}
                   onChange={(e) => {
@@ -307,7 +293,7 @@ const WalletPage = () => {
                 <input
                   value={transferTo}
                   onChange={(e) => setTransferTo(e.target.value)}
-                  placeholder="Recipient Username"
+                  placeholder="Recipient Account Number" // Updated placeholder
                   className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
                 />
                 <input
@@ -376,52 +362,63 @@ const WalletPage = () => {
           </div>
 
           <div className="bg-card rounded-[2.5rem] shadow-xl border border-border/50 overflow-hidden divide-y divide-border/50">
-            {transactions.map((t) => (
-              <div
-                key={t.id}
-                className="p-5 flex items-center justify-between active:bg-muted/30 transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                      t.amount > 0
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : "bg-rose-500/10 text-rose-500"
-                    }`}
-                  >
-                    {t.amount > 0 ? (
-                      <ArrowUpRight className="w-6 h-6" />
-                    ) : (
-                      <ArrowDownLeft className="w-6 h-6" />
-                    )}
+            {transactions.length > 0 ? (
+              transactions.map((t) => (
+                <div
+                  key={t.id}
+                  className="p-5 flex items-center justify-between active:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                        t.amount > 0
+                          ? "bg-emerald-500/10 text-emerald-500"
+                          : "bg-rose-500/10 text-rose-500"
+                      }`}
+                    >
+                      {t.amount > 0 ? (
+                        <ArrowUpRight className="w-6 h-6" />
+                      ) : (
+                        <ArrowDownLeft className="w-6 h-6" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-foreground leading-tight uppercase tracking-tight">
+                        {t.description}
+                      </p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                        {format(new Date(t.timestamp), "dd MMM yyyy • HH:mm")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-black text-foreground leading-tight uppercase tracking-tight">
-                      {t.description}
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-black ${
+                        t.amount > 0 ? "text-emerald-500" : "text-rose-500"
+                      }`}
+                    >
+                      {t.amount > 0 ? "+" : "-"} RM{" "}
+                      {Math.abs(t.amount).toFixed(2)}
                     </p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                      {format(new Date(t.timestamp), "dd MMM yyyy • HH:mm")}
-                    </p>
+                    <div className="flex items-center justify-end gap-1 mt-0.5">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">
+                        Success
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p
-                    className={`text-sm font-black ${
-                      t.amount > 0 ? "text-emerald-500" : "text-rose-500"
-                    }`}
-                  >
-                    {t.amount > 0 ? "+" : "-"} RM{" "}
-                    {Math.abs(t.amount).toFixed(2)}
-                  </p>
-                  <div className="flex items-center justify-end gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">
-                      Success
-                    </span>
-                  </div>
+              ))
+            ) : (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-muted-foreground" />
                 </div>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                  No Transactions Yet
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
