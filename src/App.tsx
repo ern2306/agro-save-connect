@@ -23,6 +23,7 @@ import ChatPage from "@/pages/ChatPage";
 import DonateSurplusPage from "@/pages/DonateSurplusPage";
 import CommunityMapPage from "@/pages/CommunityMapPage";
 import PrintLabelPage from "@/pages/PrintLabelPage";
+import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <div className="max-w-md mx-auto min-h-screen bg-background relative">
             <Routes>
               <Route path="/" element={<SplashPage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/explore" element={<ExplorePage />} />
               <Route path="/pest-detect" element={<PestDetectPage />} />
               <Route path="/add-listing" element={<AddListingPage />} />
