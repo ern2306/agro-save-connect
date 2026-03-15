@@ -3,13 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   MessageCircle,
-  MapPin,
   Minus,
   Plus,
   ShoppingCart,
   Image as ImageIcon,
 } from "lucide-react";
-import { useApp } from "@/context/AppContext";
+import { useApp, Order, Notification } from "@/context/AppContext";
 import { toast } from "sonner";
 import FreshnessIndicator from "@/components/FreshnessIndicator";
 
@@ -21,14 +20,19 @@ const OrderPage = () => {
     currentUser,
     walletBalance,
     setWalletBalance,
+    orders,
+    setOrders,
+    notifications,
+    setNotifications,
     transactions,
     setTransactions,
     chatThreads,
     setChatThreads,
+    t,
   } = useApp();
   const listing = (listings || []).find((l) => l.id === id);
 
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState<number>(1);
   const [showChatBox, setShowChatBox] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -81,8 +85,83 @@ const OrderPage = () => {
     setShowChatBox(false);
   };
 
+  const handleBuy = () => {
+    if (qty <= 0) {
+      toast.error("Please enter a valid quantity.");
+      return;
+    }
+
+    if (walletBalance < total) {
+      toast.error("Insufficient wallet balance. Please top up.");
+      navigate("/wallet");
+      return;
+    }
+
+    if (qty > listing.stock) {
+      toast.error("Not enough stock available.");
+      return;
+    }
+
+    const orderId = `o${Date.now()}`;
+
+    // Create new order
+    const newOrder: Order = {
+      id: orderId,
+      listing: listing,
+      quantity: qty,
+      totalPrice: total,
+      status: "pending",
+      buyerId: currentUser.id,
+      sellerId: listing.sellerId,
+      createdAt: new Date(),
+      address: currentUser.address || "Kuala Lumpur",
+      buyerName: currentUser.username,
+      buyerPhone: currentUser.phone,
+    };
+
+    // Create notification
+    const newNotification: Notification = {
+      id: `n${Date.now()}`,
+      type: "order_confirmed",
+      title: "Order Placed Successfully",
+      message: `You have successfully ordered ${qty}kg of ${
+        listing.name
+      } for RM ${total.toFixed(2)}. Order ID: ${orderId}`,
+      orderId: orderId,
+      timestamp: new Date(),
+      read: false,
+    };
+
+    // Update state
+    setOrders([newOrder, ...orders]);
+    setNotifications([newNotification, ...notifications]);
+    setWalletBalance(walletBalance - total);
+    setTransactions([
+      {
+        id: `t${Date.now()}`,
+        type: "purchase",
+        amount: -total,
+        description: `Purchase: ${qty}kg ${listing.name}`,
+        timestamp: new Date(),
+      },
+      ...transactions,
+    ]);
+
+    toast.success("Order placed successfully!");
+    navigate("/notifications");
+  };
+
+  const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (isNaN(value)) {
+      setQty(0);
+    } else {
+      setQty(Math.min(listing.stock, Math.max(0, value)));
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-48">
       <div className="sticky top-0 z-40 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
@@ -180,6 +259,50 @@ const OrderPage = () => {
           </div>
         )}
       </div>
+
+      {/* Bottom Buy Section */}
+      {listing.sellerId !== currentUser.id && (
+        <div className="fixed bottom-20 left-0 right-0 bg-card border-t border-border p-4 z-50 max-w-md mx-auto shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3 bg-muted/50 rounded-lg p-1">
+              <button
+                onClick={() => setQty(Math.max(1, qty - 1))}
+                className="w-8 h-8 rounded-md bg-card border border-border flex items-center justify-center text-foreground active:scale-90 transition-transform"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <input
+                type="number"
+                value={qty === 0 ? "" : qty}
+                onChange={handleQtyChange}
+                className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none"
+                placeholder="0"
+              />
+              <button
+                onClick={() => setQty(Math.min(listing.stock, qty + 1))}
+                className="w-8 h-8 rounded-md bg-card border border-border flex items-center justify-center text-foreground active:scale-90 transition-transform"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                Total Price
+              </p>
+              <p className="text-lg font-black text-primary">
+                RM {total.toFixed(2)}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleBuy}
+            className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            Buy Now
+          </button>
+        </div>
+      )}
     </div>
   );
 };
