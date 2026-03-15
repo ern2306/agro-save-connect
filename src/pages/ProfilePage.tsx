@@ -19,8 +19,10 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
-    toast.info("Logged out");
-    navigate("/");
+    setCurrentUser({ id: "", username: "", email: "", phone: "", address: "", avatar: "", accountNumber: "" });
+    localStorage.removeItem("agrosave_user");
+    toast.success("Logged out successfully!");
+    navigate("/login", { replace: true });
   };
 
   return (
