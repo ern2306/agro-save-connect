@@ -6,7 +6,6 @@ import {
   Smile,
   Image as ImageIcon,
   Camera,
-  MoreVertical,
   CheckCheck,
   X,
   Loader2,
@@ -192,7 +191,6 @@ const ChatPage = () => {
             </div>
           </div>
         </div>
-        <MoreVertical className="w-5 h-5 text-muted-foreground" />
       </div>
 
       {/* MESSAGES - added pb-32 to make room for fixed input */}

@@ -528,6 +528,37 @@ const defaultScanHistory: ScanRecord[] = [
   },
 ];
 
+const defaultTransactions: Transaction[] = [
+  {
+    id: "t1",
+    type: "topup",
+    amount: 500.0,
+    description: "Top Up via Maybank",
+    timestamp: new Date(Date.now() - 86400000 * 2), // 2 days ago
+  },
+  {
+    id: "t2",
+    type: "purchase",
+    amount: -17.5,
+    description: "Purchase: 5kg Potato",
+    timestamp: new Date(Date.now() - 86400000), // 1 day ago
+  },
+  {
+    id: "t3",
+    type: "transfer",
+    amount: -50.0,
+    description: "Transfer to Farmer Siti",
+    timestamp: new Date(Date.now() - 3600000 * 5), // 5 hours ago
+  },
+  {
+    id: "t4",
+    type: "sale",
+    amount: 120.0,
+    description: "Sale: 10kg Broccoli",
+    timestamp: new Date(Date.now() - 3600000 * 2), // 2 hours ago
+  },
+];
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const savedUser = localStorage.getItem("agro_user");
@@ -540,7 +571,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useState<Notification[]>(defaultNotifications);
   const [chatThreads, setChatThreads] =
     useState<ChatThread[]>(defaultChatThreads);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] =
+    useState<Transaction[]>(defaultTransactions);
   const [scanHistory, setScanHistory] =
     useState<ScanRecord[]>(defaultScanHistory);
   const [language, setLanguage] = useState<Language>("en");
