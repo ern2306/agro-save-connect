@@ -19,11 +19,12 @@ const LoginPage = () => {
   const { language, setLanguage, t, setCurrentUser, currentUser } = useApp();
 
   useEffect(() => {
+    // Check if user is already logged in
     const savedUser = localStorage.getItem("agro_user");
-    if (savedUser) {
-      navigate("/explore");
+    if (savedUser && currentUser) {
+      navigate("/explore", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, currentUser]);
 
   const [isLogin, setIsLogin] = useState(true);
 
@@ -67,7 +68,7 @@ const LoginPage = () => {
       setCurrentUser(user);
       localStorage.setItem("agro_user", JSON.stringify(user));
       toast.success(`${t("welcome_back")}, ${username}!`);
-      navigate("/explore");
+      navigate("/explore", { replace: true });
     } else {
       if (!username || !password || !email) {
         toast.error("Please fill in all required fields");
@@ -87,7 +88,7 @@ const LoginPage = () => {
       setCurrentUser(newUser);
       localStorage.setItem("agro_user", JSON.stringify(newUser));
       toast.success(`Account created successfully! Welcome, ${username}!`);
-      navigate("/explore");
+      navigate("/explore", { replace: true });
     }
   };
 
@@ -217,14 +218,6 @@ const LoginPage = () => {
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               {t("password")} *
             </label>
-            {isLogin && (
-              <button
-                type="button"
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                {t("forgot_password")}
-              </button>
-            )}
           </div>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">

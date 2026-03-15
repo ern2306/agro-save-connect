@@ -19,17 +19,16 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
-    setCurrentUser({
-      id: "",
-      username: "",
-      email: "",
-      phone: "",
-      address: "",
-      avatar: "",
-      accountNumber: "",
-    });
-    localStorage.removeItem("agrosave_user");
+    // Clear user from context
+    setCurrentUser(null);
+
+    // Remove user from localStorage
+    localStorage.removeItem("agro_user");
+
+    // Show logout message
     toast.success("Logged out successfully!");
+
+    // Redirect to login page with replace to prevent back navigation
     navigate("/login", { replace: true });
   };
 

@@ -1,14 +1,4 @@
-import {
-  Leaf,
-  Globe,
-  Users,
-  Award,
-  Mail,
-  Instagram,
-  Twitter,
-  Facebook,
-  ShieldCheck,
-} from "lucide-react";
+import { Leaf, Globe, Users, Award, ShieldCheck } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { useApp } from "@/context/AppContext";
 
@@ -82,27 +72,6 @@ const AboutUsPage = () => {
             empowering local farmers with AI-driven tools like Pest Detection,
             we help them protect their crops and livelihoods.
           </p>
-        </div>
-
-        {/* Contact & Social */}
-        <div className="space-y-4">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
-            Connect With Us
-          </h3>
-          <div className="flex gap-3">
-            <button className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-sm">
-              <Instagram className="w-5 h-5" />
-            </button>
-            <button className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-sm">
-              <Twitter className="w-5 h-5" />
-            </button>
-            <button className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-sm">
-              <Facebook className="w-5 h-5" />
-            </button>
-            <button className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-sm">
-              <Mail className="w-5 h-5" />
-            </button>
-          </div>
         </div>
 
         <div className="text-center pt-4">
