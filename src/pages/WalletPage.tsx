@@ -2,14 +2,12 @@ import { useState } from "react";
 import {
   ArrowUpCircle,
   Send,
-  Wallet,
   Building2,
   ArrowLeft,
   ArrowUpRight,
   ArrowDownLeft,
   Clock,
   X,
-  CheckCircle2,
   ChevronRight,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
@@ -17,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-const presetAmounts = [10, 20, 50, 100, 200, 500];
 const bankOptions = [
   "Maybank",
   "CIMB Bank",
@@ -36,8 +33,7 @@ const WalletPage = () => {
   const [showTransfer, setShowTransfer] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [amount, setAmount] = useState("");
-  const [transferTo, setTransferTo] = useState(""); // This will now be the account number
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
+  const [transferTo, setTransferTo] = useState("");
   const [withdrawBank, setWithdrawBank] = useState("");
   const [withdrawAccount, setWithdrawAccount] = useState("");
   const [topUpBank, setTopUpBank] = useState("");
@@ -48,15 +44,11 @@ const WalletPage = () => {
     setShowTransfer(false);
     setShowWithdraw(false);
     setAmount("");
-    setSelectedPreset(null);
     setTopUpBank("");
     setTopUpAccount("");
-    setTransferTo(""); // Clear transferTo as well
-  };
-
-  const handlePresetSelect = (val: number) => {
-    setSelectedPreset(val);
-    setAmount(val.toString());
+    setTransferTo("");
+    setWithdrawBank("");
+    setWithdrawAccount("");
   };
 
   const handleTopUp = () => {
@@ -66,7 +58,7 @@ const WalletPage = () => {
       return;
     }
     if (!topUpAccount.trim()) {
-      toast.error("Please enter account number");
+      toast.error("Please enter your account number");
       return;
     }
     if (!val || val <= 0) {
@@ -79,7 +71,7 @@ const WalletPage = () => {
         id: `t${Date.now()}`,
         type: "topup",
         amount: val,
-        description: `Top Up via ${topUpBank}`,
+        description: `Top Up via ${topUpBank} (****${topUpAccount.slice(-4)})`,
         timestamp: new Date(),
       },
       ...transactions,
@@ -95,7 +87,7 @@ const WalletPage = () => {
       return;
     }
     if (!transferTo.trim()) {
-      toast.error("Please enter recipient's account number"); // Updated error message
+      toast.error("Please enter recipient's account number");
       return;
     }
     if (walletBalance < val) {
@@ -108,13 +100,12 @@ const WalletPage = () => {
         id: `t${Date.now()}`,
         type: "transfer",
         amount: -val,
-        description: `Transfer to account ****${transferTo.slice(-4)}`, // Updated description
+        description: `Transfer to account ****${transferTo.slice(-4)}`,
         timestamp: new Date(),
       },
       ...transactions,
     ]);
     toast.success(`RM ${val.toFixed(2)} transferred!`);
-    setTransferTo("");
     closeAll();
   };
 
@@ -150,8 +141,6 @@ const WalletPage = () => {
       ...transactions,
     ]);
     toast.success(`RM ${val.toFixed(2)} withdrawn to ${withdrawBank}!`);
-    setWithdrawBank("");
-    setWithdrawAccount("");
     closeAll();
   };
 
@@ -236,7 +225,7 @@ const WalletPage = () => {
       </div>
 
       <div className="px-6 space-y-6">
-        {/* Transaction Panels (Modals/Inline) */}
+        {/* Transaction Panels */}
         {(showTopUp || showTransfer || showWithdraw) && (
           <div className="bg-card rounded-[2.5rem] p-6 border-2 border-primary/20 shadow-xl animate-in slide-in-from-bottom duration-300">
             <div className="flex items-center justify-between mb-6">
@@ -262,7 +251,7 @@ const WalletPage = () => {
                   onChange={(e) => setTopUpBank(e.target.value)}
                   className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none font-bold"
                 >
-                  <option value="">Select Payment Provider</option>
+                  <option value="">Select Bank</option>
                   {bankOptions.map((b) => (
                     <option key={b} value={b}>
                       {b}
@@ -270,11 +259,14 @@ const WalletPage = () => {
                   ))}
                 </select>
                 <input
+                  value={topUpAccount}
+                  onChange={(e) => setTopUpAccount(e.target.value)}
+                  placeholder="Your Bank Account Number"
+                  className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                />
+                <input
                   value={amount}
-                  onChange={(e) => {
-                    setAmount(e.target.value);
-                    setSelectedPreset(null);
-                  }}
+                  onChange={(e) => setAmount(e.target.value)}
                   type="number"
                   placeholder="Enter Amount (RM)"
                   className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
@@ -293,7 +285,7 @@ const WalletPage = () => {
                 <input
                   value={transferTo}
                   onChange={(e) => setTransferTo(e.target.value)}
-                  placeholder="Recipient Account Number" // Updated placeholder
+                  placeholder="Recipient Account Number"
                   className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
                 />
                 <input
@@ -305,7 +297,7 @@ const WalletPage = () => {
                 />
                 <button
                   onClick={handleTransfer}
-                  className="w-full py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                  className="w-full py-4 rounded-2xl bg-blue-500 text-white font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-transform"
                 >
                   Send Money
                 </button>
@@ -329,7 +321,7 @@ const WalletPage = () => {
                 <input
                   value={withdrawAccount}
                   onChange={(e) => setWithdrawAccount(e.target.value)}
-                  placeholder="Account Number"
+                  placeholder="Your Bank Account Number"
                   className="w-full px-5 py-4 rounded-2xl bg-background border border-border text-sm focus:ring-2 focus:ring-primary/20 outline-none font-bold"
                 />
                 <input
@@ -341,7 +333,7 @@ const WalletPage = () => {
                 />
                 <button
                   onClick={handleWithdraw}
-                  className="w-full py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                  className="w-full py-4 rounded-2xl bg-emerald-500 text-white font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform"
                 >
                   Confirm Withdrawal
                 </button>
@@ -350,75 +342,75 @@ const WalletPage = () => {
           </div>
         )}
 
-        {/* Transaction History Section */}
+        {/* Recent Transactions */}
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-lg font-black text-foreground uppercase tracking-tight flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" /> Transaction History
+            <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              Recent Activity
             </h3>
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-              {transactions.length} Records
-            </span>
+            <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">
+              View All
+            </button>
           </div>
 
-          <div className="bg-card rounded-[2.5rem] shadow-xl border border-border/50 overflow-hidden divide-y divide-border/50">
-            {transactions.length > 0 ? (
-              transactions.map((t) => (
+          <div className="space-y-3">
+            {transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="bg-card rounded-3xl p-4 border border-border/50 flex items-center gap-4 hover:border-primary/30 transition-colors group"
+              >
                 <div
-                  key={t.id}
-                  className="p-5 flex items-center justify-between active:bg-muted/30 transition-colors"
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                    tx.type === "topup" ||
+                    tx.type === "sale" ||
+                    tx.type === "refund"
+                      ? "bg-emerald-500/10 text-emerald-500"
+                      : "bg-red-500/10 text-red-500"
+                  }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                        t.amount > 0
-                          ? "bg-emerald-500/10 text-emerald-500"
-                          : "bg-rose-500/10 text-rose-500"
-                      }`}
-                    >
-                      {t.amount > 0 ? (
-                        <ArrowUpRight className="w-6 h-6" />
-                      ) : (
-                        <ArrowDownLeft className="w-6 h-6" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-foreground leading-tight uppercase tracking-tight">
-                        {t.description}
-                      </p>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                        {format(new Date(t.timestamp), "dd MMM yyyy • HH:mm")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-black ${
-                        t.amount > 0 ? "text-emerald-500" : "text-rose-500"
-                      }`}
-                    >
-                      {t.amount > 0 ? "+" : "-"} RM{" "}
-                      {Math.abs(t.amount).toFixed(2)}
-                    </p>
-                    <div className="flex items-center justify-end gap-1 mt-0.5">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                      <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">
-                        Success
-                      </span>
-                    </div>
+                  {tx.type === "topup" ||
+                  tx.type === "sale" ||
+                  tx.type === "refund" ? (
+                    <ArrowDownLeft className="w-6 h-6" />
+                  ) : (
+                    <ArrowUpRight className="w-6 h-6" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                    {tx.description}
+                  </p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    {format(new Date(tx.timestamp), "dd MMM yyyy · hh:mm a")}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p
+                    className={`text-sm font-black ${
+                      tx.type === "topup" ||
+                      tx.type === "sale" ||
+                      tx.type === "refund"
+                        ? "text-emerald-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {tx.type === "topup" ||
+                    tx.type === "sale" ||
+                    tx.type === "refund"
+                      ? "+"
+                      : "-"}
+                    RM {Math.abs(tx.amount).toFixed(2)}
+                  </p>
+                  <div className="flex items-center justify-end gap-1 mt-1">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">
+                      Completed
+                    </span>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Clock className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                  No Transactions Yet
-                </p>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
