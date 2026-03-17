@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { Language } from "@/lib/i18n";
+
 import {
   User,
   Lock,
-  Globe,
   ArrowRight,
   Leaf,
   Mail,
@@ -16,7 +15,7 @@ import { toast } from "sonner";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { language, setLanguage, t, setCurrentUser, currentUser } = useApp();
+  const { t, setCurrentUser, currentUser } = useApp();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -92,34 +91,10 @@ const LoginPage = () => {
     }
   };
 
-  const languages: { code: Language; label: string; flag: string }[] = [
-    { code: "en", label: "English", flag: "🇺🇸" },
-    { code: "zh", label: "中文", flag: "🇨🇳" },
-    { code: "ms", label: "Melayu", flag: "🇲🇾" },
-  ];
-
   return (
     <div className="min-h-screen bg-background flex flex-col px-6 pt-12 pb-8">
-      {/* Language Selector */}
-      <div className="flex justify-end gap-2 mb-8">
-        {languages.map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => setLanguage(lang.code)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              language === lang.code
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            <span>{lang.flag}</span>
-            <span>{lang.label}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Logo & Header */}
-      <div className="flex flex-col items-center text-center mb-8">
+      <div className="flex flex-col items-center text-center mb-8 mt-8">
         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 shadow-inner">
           <Leaf className="w-8 h-8 text-primary" />
         </div>

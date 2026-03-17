@@ -5,7 +5,63 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { Language, translations } from "@/lib/i18n";
+
+// Define a simple English translation object
+const englishTranslations = {
+  // Auth
+  login: "Login",
+  welcome_back: "Welcome Back",
+  sign_in_to_continue: "Sign in to continue to AgroSave",
+  username: "Username",
+  password: "Password",
+  forgot_password: "Forgot Password?",
+  dont_have_account: "Don't have an account?",
+  sign_up: "Sign Up",
+  enter_username: "Enter your username",
+  enter_password: "Enter your password",
+
+  // Navigation
+  explore: "Explore",
+  pest_detect: "Pest Detect",
+  sell: "Sell",
+  notifications: "Notifications",
+  me: "Me",
+
+  // Notifications
+  my_notifications: "My Notifications",
+  seller_updates: "Seller Updates",
+  no_notifications: "No notifications",
+
+  // Me Page
+  profile: "Profile",
+  wallet: "Wallet",
+  my_listings: "My Listings",
+  messages: "Messages",
+  community_map: "Community Map",
+  language: "Language",
+  logout: "Logout",
+  edit_profile: "Edit Profile",
+  balance: "Balance",
+  settings: "Settings",
+  help_center: "Help Center",
+  about_us: "About Us",
+
+  // Donation
+  donate_surplus: "Donate Surplus",
+  donation_details: "Donation Details",
+  donation_successful: "Donation Successful",
+  you_have_donated: "You have donated",
+  recipient: "Recipient",
+  date: "Date",
+  delivery_method: "Delivery Method",
+  tracking_no: "Tracking No.",
+  pickup_address: "Pick-up Address",
+  dropoff_address: "Drop-off Address",
+  print_label: "Print Shipping Label",
+  back_to_notifications: "Back to Notifications",
+  shipping_label: "Shipping Label",
+  order_details: "Order Details",
+};
 
 export interface FoodSource {
   name: string;
@@ -137,9 +193,7 @@ interface AppState {
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
   scanHistory: ScanRecord[];
   setScanHistory: React.Dispatch<React.SetStateAction<ScanRecord[]>>;
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: keyof (typeof translations)["en"]) => string;
+  t: (key: keyof typeof englishTranslations) => string;
   blockedUserIds: string[];
   setBlockedUserIds: React.Dispatch<React.SetStateAction<string[]>>;
   createChatIfNotExist: (
@@ -528,37 +582,6 @@ const defaultScanHistory: ScanRecord[] = [
   },
 ];
 
-const defaultTransactions: Transaction[] = [
-  {
-    id: "t1",
-    type: "topup",
-    amount: 500.0,
-    description: "Top Up via Maybank",
-    timestamp: new Date(Date.now() - 86400000 * 2), // 2 days ago
-  },
-  {
-    id: "t2",
-    type: "purchase",
-    amount: -17.5,
-    description: "Purchase: 5kg Potato",
-    timestamp: new Date(Date.now() - 86400000), // 1 day ago
-  },
-  {
-    id: "t3",
-    type: "transfer",
-    amount: -50.0,
-    description: "Transfer to Farmer Siti",
-    timestamp: new Date(Date.now() - 3600000 * 5), // 5 hours ago
-  },
-  {
-    id: "t4",
-    type: "sale",
-    amount: 120.0,
-    description: "Sale: 10kg Broccoli",
-    timestamp: new Date(Date.now() - 3600000 * 2), // 2 hours ago
-  },
-];
-
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const savedUser = localStorage.getItem("agro_user");
@@ -571,11 +594,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useState<Notification[]>(defaultNotifications);
   const [chatThreads, setChatThreads] =
     useState<ChatThread[]>(defaultChatThreads);
-  const [transactions, setTransactions] =
-    useState<Transaction[]>(defaultTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [scanHistory, setScanHistory] =
     useState<ScanRecord[]>(defaultScanHistory);
-  const [language, setLanguage] = useState<Language>("en");
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
@@ -611,8 +632,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const t = (key: keyof (typeof translations)["en"]) => {
-    return translations[language][key] || translations["en"][key];
+  const t = (key: keyof typeof englishTranslations) => {
+    return englishTranslations[key] || key; // Fallback to key if translation not found
   };
 
   return (
@@ -634,8 +655,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setTransactions,
         scanHistory,
         setScanHistory,
-        language,
-        setLanguage,
         t,
         blockedUserIds,
         setBlockedUserIds,

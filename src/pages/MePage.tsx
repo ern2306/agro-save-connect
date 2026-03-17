@@ -9,23 +9,14 @@ import {
   Settings,
   HelpCircle,
   Info,
-  Globe,
   Copy,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import { Language } from "@/lib/i18n";
 import { toast } from "sonner";
 
 const MePage = () => {
   const navigate = useNavigate();
-  const {
-    currentUser,
-    setCurrentUser,
-    walletBalance,
-    language,
-    setLanguage,
-    t,
-  } = useApp();
+  const { currentUser, setCurrentUser, walletBalance, t } = useApp();
 
   if (!currentUser) return null;
 
@@ -68,12 +59,6 @@ const MePage = () => {
     { icon: Settings, label: t("settings"), path: "/settings" },
     { icon: HelpCircle, label: t("help_center"), path: "/help" },
     { icon: Info, label: t("about_us"), path: "/about" },
-  ];
-
-  const languages: { code: Language; label: string; flag: string }[] = [
-    { code: "en", label: "English", flag: "🇺🇸" },
-    { code: "zh", label: "中文", flag: "🇨🇳" },
-    { code: "ms", label: "Melayu", flag: "🇲🇾" },
   ];
 
   return (
@@ -135,42 +120,6 @@ const MePage = () => {
               </div>
             </button>
           ))}
-        </div>
-
-        {/* Language Selection Section */}
-        <div className="bg-card rounded-3xl shadow-sm border border-border p-4">
-          <div className="flex items-center gap-3 mb-4 px-1">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <Globe className="w-5 h-5 text-blue-500" />
-            </div>
-            <span className="font-semibold text-sm text-foreground">
-              {t("language")}
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {languages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setLanguage(lang.code)}
-                className={`flex flex-col items-center gap-1 py-3 rounded-2xl border transition-all ${
-                  language === lang.code
-                    ? "bg-primary/5 border-primary shadow-sm"
-                    : "bg-background border-border hover:border-primary/30"
-                }`}
-              >
-                <span className="text-xl">{lang.flag}</span>
-                <span
-                  className={`text-[10px] font-bold ${
-                    language === lang.code
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {lang.label}
-                </span>
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Settings & Help */}
